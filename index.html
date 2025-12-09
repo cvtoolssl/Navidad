@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CV Tools - Santa Road Safety</title>
+    <style>
+        /* --- ESTILOS GENERALES (CSS) --- */
+        body { margin: 0; background-color: #1e1e1e; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; touch-action: none; }
+        #game-container { position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; background-color: #333; overflow: hidden; border-left: 5px solid #fff; border-right: 5px solid #fff; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        
+        /* Carretera */
+        .road-line { position: absolute; width: 10px; height: 40px; background-color: rgba(255,255,255,0.6); left: 50%; transform: translateX(-50%); }
+        
+        /* Cabecera con Logo */
+        #header { position: absolute; top: 0; width: 100%; height: 70px; background: rgba(255, 255, 255, 0.95); z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        #header img { max-height: 50px; max-width: 80%; }
+        
+        /* Elementos del juego */
+        #santa { font-size: 50px; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); transition: left 0.1s; z-index: 5; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+        .obstacle { font-size: 40px; position: absolute; z-index: 4; text-align: center; }
+        
+        /* Interfaz Puntos */
+        #score-board { position: absolute; top: 85px; right: 10px; color: #fff; font-weight: bold; font-size: 16px; background: rgba(41, 128, 185, 0.9); padding: 8px 15px; border-radius: 20px; z-index: 10; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        
+        /* --- PANTALLAS (Inicio, Game Over, Victoria) --- */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.92); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(5px); }
+        
+        h1 { color: #f1c40f; text-transform: uppercase; margin-bottom: 10px; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px; }
+        p { max-width: 85%; line-height: 1.6; margin: 5px 0; color: #e0e0e0; }
+        
+        /* Botones */
+        button { background: linear-gradient(to bottom, #3498db, #2980b9); color: white; border: none; padding: 15px 40px; font-size: 18px; border-radius: 50px; cursor: pointer; margin-top: 25px; font-weight: bold; box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4); transition: transform 0.1s; text-transform: uppercase; letter-spacing: 1px; border: 2px solid rgba(255,255,255,0.2); }
+        button:active { transform: scale(0.95); }
+        .controls-hint { margin-top: 30px; color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* --- ESTILOS DE VICTORIA (CORREGIDOS) --- */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-30px);}
+            60% {transform: translateY(-15px);}
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .victory-box { 
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            padding: 30px 20px; 
+            border-radius: 20px; 
+            border: 5px solid #2980b9; 
+            max-width: 85%; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7); 
+            position: relative;
+            z-index: 30;
+            
+            /* CENTRADO PERFECTO */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .victory-box h1, .victory-box h2, .victory-box p {
+            text-align: center; /* Asegura que el texto interno esté centrado */
+            width: 100%;
+        }
+
+        .santa-victory { 
+            font-size: 90px; 
+            margin: 10px 0; 
+            display: inline-block; 
+            animation: bounce 2s infinite; 
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
+        }
+
+        .logo-victory {
+            max-width: 180px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Confeti */
+        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 25; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- CABECERA -->
+        <div id="header">
+            <!-- LOGO PEQUEÑO (Juego) -->
+            <img src="ANAGRAMA.jpg" alt="CV Tools" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
+        </div>
+
+        <div id="score-board">Señales: <span id="score">0</span> / 10</div>
+        <div id="santa">🎅🛷</div>
+
+        <!-- Pantalla de Inicio -->
+        <div id="start-screen" class="screen">
+            <h1 style="color:#3498db;">Operación<br>Vial Navideña</h1>
+            <p>¡Hola compañero!</p>
+            <p>El tráfico está fatal. Ayuda a Santa a entregar la Navidad a tiempo.</p>
+            <p style="font-size: 14px; color: #aaa; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 10px; margin-top:15px;">🎯 Misión: Esquiva 10 señales</p>
+            <button onclick="startGame()">▶ ARRANCAR</button>
+            <div class="controls-hint">⬅️ Toca los lados para moverte ➡️</div>
+        </div>
+
+        <!-- Pantalla Game Over -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>⛔ SANTA SE LA HA PEGADO ⛔</h1>
+            <p>Te has comido una señal.</p>
+            <p style="font-size: 20px; color: #f1c40f; font-weight: bold;">Score: <span id="final-score">0</span></p>
+            <button onclick="startGame()">🔄 REINTENTAR</button>
+        </div>
+
+        <!-- PANTALLA DE VICTORIA (CV TOOLS FELICITA) -->
+        <div id="victory-screen" class="screen hidden" style="background: rgba(41, 128, 185, 0.9);">
+            <div class="victory-box">
+                <!-- LOGO GRANDE (Victoria) -->
+                <img src="ANAGRAMA.jpg" alt="CV Tools Logo" class="logo-victory" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
+                
+                <h2 style="color: #2c3e50; margin: 5px 0 0 0; font-size: 24px;">¡MISIÓN CUMPLIDA!</h2>
+                
+                <!-- Santa saliendo del carro y saludando -->
+                <div class="santa-victory">🎅🎉</div>
+                
+                <p style="font-size: 16px; margin: 10px 0; color: #555; line-height: 1.4;">
+                    El equipo de <strong>CV TOOLS</strong> te desea unas fiestas sin incidencias y llenas de alegría.
+                </p>
+                
+                <h1 style="color: #c0392b; margin: 10px 0; font-size: 32px;">¡FELIZ NAVIDAD!</h1>
+                
+                <button onclick="startGame()" style="background: #27ae60; padding: 12px 30px; font-size: 15px; margin-top: 15px;">🔄 JUGAR OTRA VEZ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- LÓGICA DEL JUEGO (JAVASCRIPT) --- */
+        const container = document.getElementById('game-container');
+        const santa = document.getElementById('santa');
+        const scoreEl = document.getElementById('score');
+        const finalScoreEl = document.getElementById('final-score');
+        
+        // Pantallas
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const victoryScreen = document.getElementById('victory-screen');
+
+        let gameRunning = false;
+        let score = 0;
+        const WIN_SCORE = 10; // Puntos para ganar
+        
+        let santaPos = 50; 
+        let obstacles = [];
+        let roadLines = [];
+        let gameSpeed = 5;
+        let spawnRate = 60;
+        let frameCount = 0;
+        let animationFrameId;
+
+        // --- CONTROLES ---
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            if (e.key === 'ArrowLeft' && santaPos > 10) santaPos -= 20;
+            if (e.key === 'ArrowRight' && santaPos < 90) santaPos += 20;
+            updateSanta();
+        });
+
+        container.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON') return;
+            if (!gameRunning) return;
+            const rect = container.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            if (clickX < rect.width / 2 && santaPos > 10) santaPos -= 20;
+            else if (clickX > rect.width / 2 && santaPos < 90) santaPos += 20;
+            updateSanta();
+        });
+
+        function updateSanta() {
+            santa.style.left = santaPos + '%';
+        }
+
+        function createObstacle() {
+            const el = document.createElement('div');
+            el.className = 'obstacle';
+            const types = ['🚧', '⛔', '🛑', '⚠️']; 
+            el.innerText = types[Math.floor(Math.random() * types.length)];
+            const lanes = [10, 30, 50, 70, 90];
+            const lane = lanes[Math.floor(Math.random() * lanes.length)];
+            el.style.left = lane + '%';
+            el.style.top = '-50px';
+            container.appendChild(el);
+            obstacles.push({ el: el, top: -50, lane: lane });
+        }
+
+        function createRoadLine() {
+            const el = document.createElement('div');
+            el.className = 'road-line';
+            el.style.top = '-50px';
+            container.appendChild(el);
+            roadLines.push({ el: el, top: -50 });
+        }
+
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            scoreEl.innerText = score;
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            victoryScreen.classList.add('hidden');
+            
+            // Borrar confeti si hay
+            document.querySelectorAll('.confetti').forEach(c => c.remove());
+
+            gameSpeed = 6;
+            spawnRate = 60;
+            obstacles.forEach(o => o.el.remove());
+            roadLines.forEach(l => l.el.remove());
+            obstacles = [];
+            roadLines = [];
+            santaPos = 50;
+            updateSanta();
+            
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScoreEl.innerText = score;
+            gameOverScreen.classList.remove('hidden');
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        function winGame() {
+            gameRunning = false;
+            victoryScreen.classList.remove('hidden');
+            cancelAnimationFrame(animationFrameId);
+            launchConfetti(); // LANZAR EFECTO
+        }
+
+        // --- SISTEMA DE CONFETI CASERO ---
+        function launchConfetti() {
+            const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'];
+            for (let i = 0; i < 50; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + '%';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDuration = (Math.random() * 2 + 2) + 's'; // 2-4 segs
+                conf.style.top = -10 + 'px';
+                container.appendChild(conf);
+            }
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            frameCount++;
+
+            if (frameCount % spawnRate === 0) createObstacle();
+            if (frameCount % 15 === 0) createRoadLine();
+
+            if (frameCount % 400 === 0) gameSpeed += 0.5;
+
+            // Mover Obstáculos
+            obstacles.forEach((obs, index) => {
+                obs.top += gameSpeed;
+                obs.el.style.top = obs.top + 'px';
+
+                if (obs.top > container.offsetHeight - 130 && obs.top < container.offsetHeight - 50) {
+                    if (Math.abs(obs.lane - santaPos) < 10) gameOver();
+                }
+
+                if (obs.top > container.offsetHeight) {
+                    obs.el.remove();
+                    obstacles.splice(index, 1);
+                    score++;
+                    scoreEl.innerText = score;
+                    if (score >= WIN_SCORE) winGame();
+                }
+            });
+
+            // Mover Líneas
+            roadLines.forEach((line, index) => {
+                line.top += gameSpeed;
+                line.el.style.top = line.top + 'px';
+                if (line.top > container.offsetHeight) {
+                    line.el.remove();
+                    roadLines.splice(index, 1);
+                }
+            });
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
