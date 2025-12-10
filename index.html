@@ -3,116 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CV Tools - Reto de Navidad</title>
+    <title>CV Tools - Reto de Navidad ULTIMATE</title>
     <style>
         /* --- ESTILOS GENERALES --- */
-        body { margin: 0; background-color: #0a0a0a; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; background-color: #050505; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
         
         #game-container { 
             position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; 
-            background: linear-gradient(to bottom, #1a252f, #000000); 
-            overflow: hidden; border-left: 5px solid #bdc3c7; border-right: 5px solid #bdc3c7; 
-            box-shadow: 0 0 60px rgba(0,0,0,0.9); 
+            overflow: hidden; border-left: 5px solid #555; border-right: 5px solid #555; 
+            box-shadow: 0 0 80px rgba(0,0,0,0.9); 
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364); /* Cielo nocturno */
         }
+
+        /* --- FONDO PARALLAX --- */
+        .parallax-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; }
         
-        /* Efecto Nieve */
+        /* Capa 1: Montañas */
+        .bg-mountains {
+            background-image: linear-gradient(to bottom, transparent 60%, #0a0a0a 60%), 
+                              linear-gradient(135deg, transparent 45%, #151515 50%, transparent 55%), 
+                              linear-gradient(225deg, transparent 45%, #151515 50%, transparent 55%);
+            background-size: 100% 100%, 120px 100px, 120px 100px;
+            background-position: 0 0, 0 100%, 60px 100%; opacity: 0.5; z-index: 1;
+        }
+        /* Capa 2: Pinos */
+        .bg-trees {
+            background-image: radial-gradient(circle at 50% 100%, #1e3c2f 10%, transparent 12%),
+                              radial-gradient(circle at 50% 100%, #162b22 10%, transparent 12%);
+            background-size: 80px 150px; background-position: 0 0, 420px 60px;
+            z-index: 2; opacity: 0.8;
+        }
+
+        /* --- EFECTOS VISUALES --- */
+        .speed-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 18;
+            background: transparent; opacity: 0; transition: opacity 0.5s;
+        }
+        .speed-lines.active {
+            opacity: 0.6;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 120px);
+            animation: scrollLines 0.2s linear infinite;
+        }
+        @keyframes scrollLines { from { background-position: 0 0; } to { background-position: 0 120px; } }
+        
+        /* MODO FIESTA */
+        @keyframes disco {
+            0% { background-color: rgba(255, 0, 0, 0.2); } 25% { background-color: rgba(0, 255, 0, 0.2); }
+            50% { background-color: rgba(0, 0, 255, 0.2); } 75% { background-color: rgba(255, 255, 0, 0.2); }
+            100% { background-color: rgba(255, 0, 255, 0.2); }
+        }
+        .party-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 15;
+            pointer-events: none; display: none; mix-blend-mode: overlay;
+        }
+        .party-overlay.active { display: block; animation: disco 0.5s infinite; }
+
+        /* MODO SLOW MOTION */
+        .slowmo-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 16;
+            pointer-events: none; background: rgba(52, 152, 219, 0.2);
+            opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(2px);
+        }
+        .slowmo-overlay.active { opacity: 1; }
+
+        /* Nieve */
         .snowflake {
-            position: absolute; top: -10px; background: white; border-radius: 50%; opacity: 0.9;
+            position: absolute; top: -10px; background: white; border-radius: 50%; opacity: 0.8;
             animation: fall linear infinite; pointer-events: none; z-index: 15;
         }
         @keyframes fall { to { transform: translateY(105vh); } }
 
-        /* Carretera */
-        .road-line { position: absolute; width: 10px; height: 70px; background-color: rgba(255,255,255,0.6); left: 50%; transform: translateX(-50%); border-radius: 4px; }
+        /* Elementos Juego */
+        .road-line { position: absolute; width: 10px; height: 70px; background-color: rgba(255,255,255,0.7); left: 50%; transform: translateX(-50%); border-radius: 4px; z-index: 3; }
         
-        /* Cabecera */
-        #header { position: absolute; top: 0; width: 100%; height: 75px; background: rgba(255, 255, 255, 0.95); z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
+        #header { position: absolute; top: 0; width: 100%; height: 75px; background: rgba(255, 255, 255, 0.95); z-index: 25; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
         #header img { max-height: 55px; max-width: 85%; object-fit: contain; }
         
-        /* JUGADOR */
         #player { 
             position: absolute; bottom: 130px; left: 50%; 
-            transform: translateX(-50%); transition: left 0.07s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-            z-index: 5; width: 80px; height: 80px; 
+            transform: translateX(-50%); transition: left 0.1s cubic-bezier(0.2, 0.6, 0.4, 1); 
+            z-index: 10; width: 80px; height: 80px; 
             display: flex; justify-content: center; align-items: flex-end;
         }
         .player-emoji { font-size: 60px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
         .player-img { 
             width: 75px; height: 75px; border-radius: 50%; 
             border: 3px solid #fff; object-fit: cover; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
-            background: #fff;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8); background: #fff;
         }
-
-        /* OBSTÁCULOS Y REGALOS */
-        .obstacle { font-size: 45px; position: absolute; z-index: 4; text-align: center; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
         
-        .gift { 
-            font-size: 45px; position: absolute; z-index: 4; text-align: center; 
-            filter: drop-shadow(0 0 15px #f1c40f); /* Brillo dorado */
-            animation: pulse 0.5s infinite alternate;
+        #player.invincible .player-img, #player.invincible .player-emoji {
+            filter: drop-shadow(0 0 20px #f1c40f) brightness(1.2); animation: shake 0.2s infinite;
         }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } 100% { transform: translateX(0); } }
 
+        .obstacle, .gift, .powerup, .slowmo { position: absolute; z-index: 5; text-align: center; transition: transform 0.1s; }
+        .obstacle { font-size: 45px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
+        .obstacle.destroyed { transform: scale(1.5) rotate(45deg); opacity: 0; transition: all 0.2s; }
+        .gift { font-size: 45px; filter: drop-shadow(0 0 15px #f1c40f); animation: pulse 0.5s infinite alternate; }
+        .powerup { width: 50px; height: 50px; background: #fff; border-radius: 50%; border: 3px solid #3498db; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px #3498db; animation: spin 2s infinite linear; }
+        .powerup img { width: 40px; }
+        .slowmo { font-size: 45px; filter: drop-shadow(0 0 15px #00ffff); animation: pulse 1s infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+        /* UI */
         .points-float {
-            position: absolute; color: #f1c40f; font-weight: 900; font-size: 30px; 
-            z-index: 20; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            animation: floatUp 1s forwards;
+            position: absolute; font-weight: 900; font-size: 28px; z-index: 30; 
+            text-shadow: 0 2px 5px rgba(0,0,0,0.9); animation: floatUp 0.8s forwards;
         }
-        @keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }
+        @keyframes floatUp { from { transform: translateY(0) scale(1); opacity:1;} to { transform: translateY(-80px) scale(1.5); opacity: 0; } }
 
-        /* Marcador */
-        #score-board { position: absolute; top: 90px; right: 15px; color: #fff; font-weight: 800; font-size: 18px; background: linear-gradient(90deg, #c0392b, #e74c3c); padding: 8px 18px; border-radius: 50px; z-index: 10; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px black;}
+        #shield-bar {
+            position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%);
+            width: 0px; height: 8px; background: linear-gradient(90deg, #f1c40f, #e67e22); border-radius: 4px;
+            z-index: 20; box-shadow: 0 0 10px #f1c40f; transition: width 0.1s linear;
+        }
+
+        #score-board { position: absolute; top: 90px; right: 15px; color: #fff; font-weight: 800; font-size: 18px; background: linear-gradient(90deg, #c0392b, #e74c3c); padding: 8px 18px; border-radius: 50px; z-index: 25; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px black;}
         
-        /* PANTALLAS */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 20, 0.98); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 20, 0.98); z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box; overflow-y: auto; }
         
         h1 { color: #3498db; text-transform: uppercase; margin-bottom: 5px; font-size: 26px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; }
         .subtitle { color: #f1c40f; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
         
-        /* SELECTOR DE PERSONAJE (GRID MEJORADO) */
-        .char-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 15px; margin: 15px 0; 
-            max-width: 350px;
-        }
+        .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0; max-width: 350px; }
         .char-option { 
-            width: 70px; height: 70px; border-radius: 50%; background: rgba(255,255,255,0.05);
+            width: 65px; height: 65px; border-radius: 50%; background: rgba(255,255,255,0.05);
             border: 3px solid #555; cursor: pointer; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
             position: relative; margin: 0 auto;
         }
         .char-option img { width: 100%; height: 100%; object-fit: cover; }
         .char-option.selected { border-color: #2ecc71; box-shadow: 0 0 15px #2ecc71; transform: scale(1.1); background: rgba(255,255,255,0.2); }
-        .char-emoji { font-size: 40px; }
-        
-        /* Destacar a Santa en el medio */
-        .char-option.santa-mode {
-            border-color: #e74c3c;
-        }
-        .char-option.santa-mode.selected {
-            box-shadow: 0 0 25px #e74c3c;
-        }
+        .char-emoji { font-size: 35px; }
+        .char-option.santa-mode { border-color: #e74c3c; }
+        .char-option.santa-mode.selected { box-shadow: 0 0 25px #e74c3c; }
 
-        /* TARJETA DE RESULTADO */
+        /* TARJETA FINAL */
         .christmas-card {
-            animation: popIn 0.8s ease;
-            background: #fff; color: #333;
-            width: 100%; max-width: 350px;
-            border-radius: 15px; padding: 25px 20px;
-            box-shadow: 0 20px 70px rgba(0,0,0,1);
-            border-top: 10px solid #c0392b; 
-            border-bottom: 10px solid #2980b9; 
+            animation: popIn 0.8s ease; background: #fff; color: #333;
+            width: 100%; max-width: 350px; border-radius: 15px; padding: 25px 20px;
+            box-shadow: 0 20px 70px rgba(0,0,0,1); border-top: 10px solid #c0392b; border-bottom: 10px solid #2980b9; 
         }
-
-        .card-title { font-size: 28px; color: #c0392b; font-family: serif; font-weight: bold; margin: 10px 0; }
-        .card-score { font-size: 45px; font-weight: 900; color: #2c3e50; margin: 5px 0; }
+        .card-title { font-size: 28px; color: #c0392b; font-family: serif; font-weight: bold; margin: 5px 0; }
+        .card-score { font-size: 45px; font-weight: 900; color: #2c3e50; margin: 0; }
         .card-label { font-size: 12px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
-        .card-message { margin: 20px 0; font-size: 15px; line-height: 1.5; color: #555; border-top: 1px solid #eee; padding-top: 15px; }
+        
+        /* BOCADILLO DE FRASE GRACIOSA */
+        .quote-bubble {
+            background: #fdf2e9; border: 2px solid #f39c12; border-radius: 10px;
+            padding: 10px; margin: 15px 0; position: relative;
+        }
+        .quote-bubble:after {
+            content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 0 10px 10px; border-style: solid; border-color: #f39c12 transparent; display: block; width: 0;
+        }
+        #fun-quote { font-style: italic; color: #d35400; font-weight: 600; font-size: 14px; margin: 0; }
+        #quote-author { display: block; text-align: right; font-size: 11px; color: #777; margin-top: 5px; text-transform: uppercase; }
+
+        .card-message { margin-top: 10px; font-size: 15px; line-height: 1.5; color: #555; border-top: 1px solid #eee; padding-top: 10px; }
         .company-highlight { color: #2980b9; font-weight: 900; font-size: 16px; }
 
-        /* Botones */
         button { 
             background: #34495e; color: white; border: none; padding: 14px 30px; font-size: 16px; 
             border-radius: 50px; cursor: pointer; margin-top: 10px; font-weight: bold; 
@@ -129,6 +181,15 @@
 <body>
 
     <div id="game-container">
+        <!-- CAPAS PARALLAX -->
+        <div class="parallax-layer bg-mountains" id="bg-mountains"></div>
+        <div class="parallax-layer bg-trees" id="bg-trees"></div>
+
+        <!-- EFECTOS VISUALES -->
+        <div id="speed-lines" class="speed-lines"></div>
+        <div id="party-overlay" class="party-overlay"></div>
+        <div id="slowmo-overlay" class="slowmo-overlay"></div>
+
         <!-- CABECERA -->
         <div id="header">
             <img src="ANAGRAMA.jpg" alt="CV Tools" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
@@ -136,17 +197,17 @@
 
         <div id="score-board">PUNTOS: <span id="score">0</span></div>
         
-        <!-- JUGADOR -->
+        <!-- JUGADOR + Barra Escudo -->
         <div id="player"></div>
+        <div id="shield-bar"></div>
 
         <!-- PANTALLA INICIO -->
         <div id="start-screen" class="screen">
-            <h1 style="color:#fff; margin-bottom: 0;">Reto de Navidad</h1>
+            <h1 style="color:#fff; margin-bottom: 0;">Reto Navidad</h1>
             <div class="subtitle">CV TOOLS EDITION</div>
             
             <p style="color:#bbb; font-size: 13px;">Elige a tu conductor:</p>
             
-            <!-- SELECTOR (GRID) -->
             <div class="char-grid">
                 <!-- Fila 1 -->
                 <div class="char-option" onclick="selectChar('pablo', this)">
@@ -158,8 +219,7 @@
                 <div class="char-option" onclick="selectChar('carmen', this)">
                     <img src="Carmen.png" onerror="this.src='https://ui-avatars.com/api/?name=Carmen&background=random&color=fff'">
                 </div>
-                
-                <!-- Fila 2 (Santa en medio) -->
+                <!-- Fila 2 -->
                 <div class="char-option" onclick="selectChar('rebeca', this)">
                     <img src="Rebeca.png" onerror="this.src='https://ui-avatars.com/api/?name=Rebeca&background=random&color=fff'">
                 </div>
@@ -172,13 +232,17 @@
                 </div>
             </div>
             
-            <div id="char-name-display" style="color: #e74c3c; font-weight: bold; margin-bottom: 15px; font-size: 18px; text-transform: uppercase;">SANTA</div>
+            <div id="char-name-display" style="color: #e74c3c; font-weight: bold; margin-bottom: 10px; font-size: 18px; text-transform: uppercase;">SANTA</div>
+            
+            <div id="high-score-display" style="font-size: 12px; color: #f1c40f; margin-bottom: 10px; font-weight: bold; border: 1px solid #f1c40f; padding: 5px 10px; border-radius: 10px;">
+                🏆 TU RÉCORD: 0
+            </div>
 
-            <p style="font-size: 14px; color: #f1c40f; margin-bottom: 15px;">
-                🎁 <strong>NUEVO:</strong> ¡Coge regalos para ganar +5 puntos!
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 15px; line-height: 1.4;">
+                🎁 Regalo (+5) | 🛡️ Logo (Invencible) | ❄️ Copo (Slow Motion)
             </p>
 
-            <button class="btn-play" onclick="startGame()">▶ COMENZAR RETO</button>
+            <button class="btn-play" onclick="startGame()">▶ JUGAR AHORA 🔊</button>
         </div>
 
         <!-- PANTALLA RESULTADO -->
@@ -186,15 +250,18 @@
             <div class="christmas-card">
                 <div class="card-label">Puntuación Final</div>
                 <div class="card-score" id="final-score">0</div>
+                <div id="new-record-msg" style="color: #f1c40f; font-weight: bold; font-size: 14px; display:none;">✨ ¡NUEVO RÉCORD! ✨</div>
                 
+                <!-- FRASES GRACIOSAS AQUÍ -->
+                <div class="quote-bubble">
+                    <p id="fun-quote">"Ups, eso ha dolido..."</p>
+                    <span id="quote-author">- CONDUCTOR</span>
+                </div>
+
                 <div class="card-title">¡Feliz Navidad!</div>
                 
                 <div class="card-message">
                     El equipo de <span class="company-highlight">CV TOOLS</span> te desea unas fiestas llenas de alegría y un 2026 lleno de éxitos.
-                </div>
-
-                <div style="font-size: 13px; color: #999; margin-bottom: 15px; font-style: italic;">
-                    "Gracias por contar con nosotros"
                 </div>
 
                 <button class="btn-whatsapp" onclick="shareWhatsapp()">
@@ -208,10 +275,82 @@
     </div>
 
     <script>
+        /* --- DICCIONARIO DE FRASES DIVERTIDAS --- */
+        const characterQuotes = {
+            'SANTA': [
+                "¡Jo Jo Nooo! Se me han caído los regalos...",
+                "Esto con los renos no pasaba.",
+                "¡La leche! ¡Qué golpe!",
+                "Necesito el taller de reparaciones del Polo Norte."
+            ],
+            'PABLO': [
+                "La próxima vez que nos veamos analizamos este choque.",
+                "Ese cono no estaba en el presupuesto.",
+                "Cuando me coma el bocadillo de almorzar lo esquivo fijo.",
+                "Esa valla no estaba en el presupuesto"
+            ],
+            'OLGA': [
+                "Ese cono no estaba en el presupuesto.",
+                "Mañana a primera hora gestiono este incidente.",
+                "¡Ay! Mi T-Roc nuevo...",
+                "Esto no cumple la normativa ISO de conducción."
+            ],
+            'CARMEN': [
+                "¡Ups! Me ha pillado en Mercurio retrógrado.",
+                "Redirigiendo ruta... Menuda leche!",
+                "¿Alguien tiene el número de la grúa? Madre de Dios",
+                "¿Eso era una señal MOPU o económica?"
+            ],
+            'REBECA': [
+                "Esto lo arreglo yo en un momento.",
+                "¡Ups! Me ha pillado en Mercurio retrógrado.",
+                "¿Eso era una señal MOPU o económica?",
+                "Menos mal que tenemos seguro a todo riesgo."
+            ],
+            'SAYO': [
+                "Uff.. que golpe...Llama al comercial de la zona",
+                "La agencia ha tenido la culpa. Lo sabemos todos",
+                "La seguridad vial es lo primero (menos hoy).",
+                "¡Crash! Sistema reiniciando..."
+            ]
+        };
+
+        /* --- MOTOR DE AUDIO (SYNTHESIS) --- */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const SoundFX = {
+            playTone: (freq, type, duration) => {
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            },
+            gift: () => {
+                SoundFX.playTone(880, 'sine', 0.1);
+                setTimeout(() => SoundFX.playTone(1760, 'sine', 0.2), 100);
+            },
+            powerup: () => {
+                SoundFX.playTone(400, 'square', 0.1);
+                setTimeout(() => SoundFX.playTone(600, 'square', 0.1), 100);
+                setTimeout(() => SoundFX.playTone(1000, 'square', 0.3), 200);
+            },
+            slowmo: () => { SoundFX.playTone(1200, 'sine', 0.5); },
+            crash: () => {
+                SoundFX.playTone(100, 'sawtooth', 0.5);
+                SoundFX.playTone(50, 'square', 0.5);
+            }
+        };
+
         /* --- CONFIGURACIÓN --- */
-        const INITIAL_SPEED = 8;
-        const INITIAL_SPAWN_RATE = 45; 
-        const MAX_SPEED = 22; 
+        const INITIAL_SPEED = 9;
+        const MAX_SPEED = 24;
         
         /* DOM */
         const container = document.getElementById('game-container');
@@ -220,21 +359,37 @@
         const startScreen = document.getElementById('start-screen');
         const resultScreen = document.getElementById('result-screen');
         const finalScoreEl = document.getElementById('final-score');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const shieldBar = document.getElementById('shield-bar');
+        
+        // Efectos
+        const speedLines = document.getElementById('speed-lines');
+        const partyOverlay = document.getElementById('party-overlay');
+        const slowmoOverlay = document.getElementById('slowmo-overlay');
+        const bgTrees = document.getElementById('bg-trees');
+        const bgMountains = document.getElementById('bg-mountains');
 
         /* VARIABLES */
         let gameRunning = false;
         let score = 0;
+        let highScore = localStorage.getItem('cvToolsHighScore') || 0;
         let playerPos = 50; 
-        let obstacles = [];
-        let gifts = []; // Array para los regalos
+        
+        let items = [];
         let roadLines = [];
         
         let gameSpeed = INITIAL_SPEED;
-        let spawnRate = INITIAL_SPAWN_RATE;
+        let spawnRate = 45;
         let frameCount = 0;
         let animId;
         
+        let isInvincible = false;
+        let isSlowMo = false;
+        let invincibleTimer, slowMoTimer;
+        
         let currentDriver = { type: 'emoji', val: '🎅', name: 'SANTA' };
+
+        highScoreDisplay.innerText = `🏆 TU RÉCORD: ${highScore}`;
 
         /* NIEVE */
         function createSnow() {
@@ -256,16 +411,13 @@
             element.classList.add('selected');
 
             const nameDisplay = document.getElementById('char-name-display');
-            
-            // Lógica simple para nombres
             let name = charType.toUpperCase();
-            let color = '#3498db'; // Azul por defecto
+            let color = '#3498db'; 
 
             if (charType === 'santa') {
                 currentDriver = { type: 'emoji', val: '🎅', name: 'SANTA' };
                 color = '#e74c3c';
             } else {
-                // Para las fotos, asumimos que el archivo se llama Nombre.png
                 let filename = charType.charAt(0).toUpperCase() + charType.slice(1) + ".png";
                 currentDriver = { type: 'img', val: filename, name: name };
                 color = '#2ecc71';
@@ -274,7 +426,6 @@
             nameDisplay.innerText = currentDriver.name;
         }
 
-        /* DIBUJAR JUGADOR */
         function renderPlayer() {
             playerEl.innerHTML = '';
             if (currentDriver.type === 'emoji') {
@@ -312,8 +463,9 @@
 
         function updatePlayerPos() { playerEl.style.left = playerPos + '%'; }
 
-        /* CONTROL DEL JUEGO */
+        /* JUEGO */
         function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             renderPlayer();
             startScreen.classList.add('hidden');
             resetVariables();
@@ -324,50 +476,102 @@
         function resetGame() {
             resultScreen.classList.add('hidden');
             startScreen.classList.remove('hidden');
+            highScoreDisplay.innerText = `🏆 TU RÉCORD: ${localStorage.getItem('cvToolsHighScore') || 0}`;
         }
 
         function resetVariables() {
             score = 0; scoreEl.innerText = score;
             playerPos = 50; updatePlayerPos();
-            obstacles.forEach(o => o.el.remove());
-            gifts.forEach(g => g.el.remove()); // Borrar regalos
-            roadLines.forEach(l => l.el.remove());
-            obstacles = []; gifts = []; roadLines = [];
             
-            gameSpeed = INITIAL_SPEED; 
-            spawnRate = INITIAL_SPAWN_RATE; 
-            frameCount = 0;
+            items.forEach(i => i.el.remove());
+            roadLines.forEach(l => l.el.remove());
+            items = []; roadLines = [];
+            
+            gameSpeed = INITIAL_SPEED; spawnRate = 45; frameCount = 0;
+            deactivateInvincibility();
+            deactivateSlowMo();
+            speedLines.classList.remove('active');
             
             if(animId) cancelAnimationFrame(animId);
         }
 
-        /* GENERADORES */
-        function createObstacle() {
-            const el = document.createElement('div');
-            el.className = 'obstacle';
-            const types = ['🚧', '⛔', '🛑', '⚠️'];
-            el.innerText = types[Math.floor(Math.random() * types.length)];
+        /* SPAWNERS */
+        function createItem(type) {
             const lanes = [10, 30, 50, 70, 90];
             const lane = lanes[Math.floor(Math.random() * lanes.length)];
+            if(items.some(i => Math.abs(i.top - (-80)) < 120 && i.lane === lane)) return;
+
+            const el = document.createElement('div');
+            let itemObj = { el, top: -80, lane, type };
+
+            if (type === 'obstacle') {
+                el.className = 'obstacle';
+                const types = ['🚧', '⛔', '🛑', '⚠️'];
+                el.innerText = types[Math.floor(Math.random() * types.length)];
+            } 
+            else if (type === 'gift') {
+                el.className = 'gift'; el.innerText = '🎁';
+            }
+            else if (type === 'powerup') {
+                el.className = 'powerup';
+                el.innerHTML = `<img src="ANAGRAMA.jpg" onerror="this.src='https://via.placeholder.com/40/ffffff/2980b9?text=CV'">`;
+            }
+            else if (type === 'slowmo') {
+                el.className = 'slowmo'; el.innerText = '❄️';
+            }
+
             el.style.left = lane + '%'; el.style.top = '-80px';
             container.appendChild(el);
-            obstacles.push({ el, top: -80, lane });
+            items.push(itemObj);
         }
 
-        function createGift() {
-            const el = document.createElement('div');
-            el.className = 'gift';
-            el.innerText = '🎁';
-            const lanes = [10, 30, 50, 70, 90];
-            const lane = lanes[Math.floor(Math.random() * lanes.length)];
-            
-            // Evitar que salga encima de un obstáculo reciente (simple check)
-            const collision = obstacles.some(obs => Math.abs(obs.top - (-80)) < 100 && obs.lane === lane);
-            if(collision) return; // Si va a chocar al nacer, abortamos
+        /* PODERES */
+        function activateInvincibility() {
+            SoundFX.powerup();
+            isInvincible = true;
+            playerEl.classList.add('invincible');
+            partyOverlay.classList.add('active'); // MODO FIESTA
+            shieldBar.style.width = '80px';
+            showFloatText('¡ESCUDO CV TOOLS!', '#3498db');
+            if(invincibleTimer) clearTimeout(invincibleTimer);
+            invincibleTimer = setTimeout(deactivateInvincibility, 5000);
+        }
 
-            el.style.left = lane + '%'; el.style.top = '-80px';
-            container.appendChild(el);
-            gifts.push({ el, top: -80, lane });
+        function deactivateInvincibility() {
+            isInvincible = false;
+            playerEl.classList.remove('invincible');
+            partyOverlay.classList.remove('active');
+            shieldBar.style.width = '0px';
+        }
+
+        function activateSlowMo() {
+            SoundFX.slowmo();
+            isSlowMo = true;
+            slowmoOverlay.classList.add('active');
+            showFloatText('¡SLOW MOTION!', '#00ffff');
+            let originalSpeed = gameSpeed;
+            gameSpeed = 5; 
+            if(slowMoTimer) clearTimeout(slowMoTimer);
+            slowMoTimer = setTimeout(() => { deactivateSlowMo(originalSpeed); }, 4000);
+        }
+
+        function deactivateSlowMo(targetSpeed) {
+            isSlowMo = false;
+            slowmoOverlay.classList.remove('active');
+            if(targetSpeed) gameSpeed = targetSpeed;
+            else gameSpeed = Math.max(INITIAL_SPEED, gameSpeed);
+        }
+
+        function showFloatText(text, color) {
+            const floatText = document.createElement('div');
+            floatText.className = 'points-float';
+            floatText.innerText = text;
+            floatText.style.color = color;
+            floatText.style.left = '50%';
+            floatText.style.transform = 'translateX(-50%)';
+            floatText.style.top = (container.offsetHeight - 250) + 'px';
+            container.appendChild(floatText);
+            setTimeout(() => floatText.remove(), 800);
         }
 
         /* LOOP PRINCIPAL */
@@ -375,12 +579,13 @@
             if (!gameRunning) return;
             frameCount++;
             
-            // 1. GENERACIÓN
-            if (frameCount % Math.floor(spawnRate) === 0) createObstacle();
-            
-            // Los regalos salen menos a menudo (cada 4 veces que saldría un obstáculo aprox)
-            if (frameCount % (Math.floor(spawnRate) * 3) === 0 && Math.random() > 0.3) createGift();
+            // GENERACIÓN
+            if (frameCount % Math.floor(spawnRate) === 0) createItem('obstacle');
+            if (frameCount % (Math.floor(spawnRate) * 4) === 0 && Math.random() > 0.4) createItem('gift');
+            if (frameCount % 600 === 0) createItem('powerup'); 
+            if (frameCount % 900 === 0) createItem('slowmo');
 
+            // LÍNEAS
             if (frameCount % 10 === 0) { 
                 const l = document.createElement('div');
                 l.className = 'road-line'; l.style.top = '-70px';
@@ -388,49 +593,60 @@
                 roadLines.push({ el: l, top: -70 });
             }
             
-            // 2. DIFICULTAD
-            if (frameCount % 300 === 0) {
+            // DIFICULTAD Y PARALLAX
+            if (!isSlowMo && frameCount % 300 === 0) {
                 if (gameSpeed < MAX_SPEED) gameSpeed += 1;
                 if (spawnRate > 20) spawnRate -= 2;
+                if (gameSpeed > 15) speedLines.classList.add('active');
             }
 
-            // 3. MOVIMIENTO OBSTÁCULOS
-            obstacles.forEach((obs, i) => {
-                obs.top += gameSpeed;
-                obs.el.style.top = obs.top + 'px';
-                
-                // Colisión MALA
-                if (obs.top > container.offsetHeight - 140 && obs.top < container.offsetHeight - 50) {
-                    if (Math.abs(obs.lane - playerPos) < 15) finishGame();
-                }
-                
-                // Salir de pantalla (Punto normal)
-                if (obs.top > container.offsetHeight) {
-                    obs.el.remove(); obstacles.splice(i, 1);
-                    score++; scoreEl.innerText = score;
-                }
-            });
+            bgTrees.style.backgroundPositionY = (frameCount * (gameSpeed * 0.5)) + 'px';
+            bgMountains.style.backgroundPositionY = (frameCount * (gameSpeed * 0.1)) + 'px';
 
-            // 4. MOVIMIENTO REGALOS (MEJORA CHULA)
-            gifts.forEach((gift, i) => {
-                gift.top += gameSpeed;
-                gift.el.style.top = gift.top + 'px';
-
-                // Colisión BUENA (Coger regalo)
-                if (gift.top > container.offsetHeight - 140 && gift.top < container.offsetHeight - 50) {
-                    if (Math.abs(gift.lane - playerPos) < 15) {
-                        // ¡COGIDO!
-                        collectGift(gift, i);
-                        return; // Salir de esta iteración
+            // FÍSICAS
+            items.forEach((item, i) => {
+                item.top += gameSpeed;
+                item.el.style.top = item.top + 'px';
+                
+                if (item.top > container.offsetHeight - 140 && item.top < container.offsetHeight - 50) {
+                    if (Math.abs(item.lane - playerPos) < 15) {
+                        
+                        if (item.type === 'obstacle') {
+                            if (isInvincible) {
+                                item.el.classList.add('destroyed');
+                                SoundFX.crash();
+                                score += 2; scoreEl.innerText = score;
+                                items.splice(i, 1);
+                                setTimeout(() => item.el.remove(), 200);
+                                return;
+                            } else {
+                                SoundFX.crash();
+                                finishGame();
+                            }
+                        } 
+                        else if (item.type === 'gift') {
+                            SoundFX.gift();
+                            showFloatText('+5', '#f1c40f');
+                            score += 5; scoreEl.innerText = score;
+                            item.el.remove(); items.splice(i, 1);
+                        }
+                        else if (item.type === 'powerup') {
+                            activateInvincibility();
+                            item.el.remove(); items.splice(i, 1);
+                        }
+                        else if (item.type === 'slowmo') {
+                            activateSlowMo();
+                            item.el.remove(); items.splice(i, 1);
+                        }
                     }
                 }
-
-                if (gift.top > container.offsetHeight) {
-                    gift.el.remove(); gifts.splice(i, 1);
+                
+                if (item.top > container.offsetHeight) {
+                    if(item.type === 'obstacle') { score++; scoreEl.innerText = score; }
+                    item.el.remove(); items.splice(i, 1);
                 }
             });
 
-            // 5. MOVIMIENTO LÍNEAS
             roadLines.forEach((l, i) => {
                 l.top += gameSpeed; l.el.style.top = l.top + 'px';
                 if (l.top > container.offsetHeight) { l.el.remove(); roadLines.splice(i, 1); }
@@ -439,52 +655,41 @@
             if (gameRunning) animId = requestAnimationFrame(gameLoop);
         }
 
-        function collectGift(giftObj, index) {
-            // Efecto visual "+5"
-            const floatText = document.createElement('div');
-            floatText.className = 'points-float';
-            floatText.innerText = '+5';
-            floatText.style.left = giftObj.lane + '%';
-            floatText.style.top = (container.offsetHeight - 150) + 'px';
-            container.appendChild(floatText);
-            setTimeout(() => floatText.remove(), 1000);
-
-            // Eliminar regalo y sumar puntos
-            giftObj.el.remove();
-            gifts.splice(index, 1);
-            score += 5;
-            scoreEl.innerText = score;
-        }
-
-        /* FIN DEL JUEGO */
+        /* FIN */
         function finishGame() {
             gameRunning = false;
             finalScoreEl.innerText = score;
+            
+            // FRASES GRACIOSAS
+            const driverName = currentDriver.name;
+            const quoteEl = document.getElementById('fun-quote');
+            const authorEl = document.getElementById('quote-author');
+            
+            const quotes = characterQuotes[driverName] || characterQuotes['SANTA'];
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            
+            quoteEl.innerText = `"${randomQuote}"`;
+            authorEl.innerText = `- ${driverName}`;
+
+            // Récord
+            let isNewRecord = false;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('cvToolsHighScore', highScore);
+                isNewRecord = true;
+            }
+            document.getElementById('new-record-msg').style.display = isNewRecord ? 'block' : 'none';
+
             resultScreen.classList.remove('hidden');
-            launchConfetti();
         }
 
         /* COMPARTIR */
         function shareWhatsapp() {
             const driverName = currentDriver.name;
-            const text = `🎅 Reto Navidad CV TOOLS 🎅\n\n¡He conseguido ${score} puntos con ${driverName} cogiendo regalos!\n\n¿Puedes superarme?\n\nJuega aquí:`;
+            const text = `🎅 Reto Navidad CV TOOLS 🎅\n\n¡He logrado ${score} puntos con ${driverName}!\n\n¿Puedes superar mi récord?\n\nJuega aquí:`;
             const url = window.location.href;
             const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`;
             window.open(waUrl, '_blank');
-        }
-
-        function launchConfetti() {
-            const colors = ['#e74c3c', '#2ecc71', '#f1c40f', '#3498db', '#ffffff'];
-            for (let i = 0; i < 60; i++) {
-                const c = document.createElement('div');
-                c.style.position = 'absolute'; c.style.width='8px'; c.style.height='8px';
-                c.style.background = colors[Math.floor(Math.random()*colors.length)];
-                c.style.left = Math.random()*100+'%'; c.style.top='-10px';
-                c.style.zIndex = 30;
-                c.style.borderRadius = '50%';
-                c.style.animation = `fall ${Math.random()*2+1}s linear`;
-                container.appendChild(c);
-            }
         }
     </script>
 </body>
