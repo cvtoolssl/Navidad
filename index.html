@@ -3,111 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CV Tools - Operación Vial Navideña</title>
+    <title>CV Tools - Reto de Navidad</title>
     <style>
         /* --- ESTILOS GENERALES --- */
-        body { margin: 0; background-color: #121212; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; background-color: #0a0a0a; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
         
         #game-container { 
             position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; 
-            background: linear-gradient(to bottom, #2c3e50, #000); /* Carretera nocturna */
-            overflow: hidden; border-left: 6px solid #ecf0f1; border-right: 6px solid #ecf0f1; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.9); 
+            background: linear-gradient(to bottom, #1a252f, #000000); /* Noche cerrada */
+            overflow: hidden; border-left: 5px solid #bdc3c7; border-right: 5px solid #bdc3c7; 
+            box-shadow: 0 0 60px rgba(0,0,0,0.9); 
         }
         
-        /* Efecto Nieve */
+        /* Efecto Nieve Intenso */
         .snowflake {
             position: absolute; top: -10px; background: white; border-radius: 50%; opacity: 0.9;
             animation: fall linear infinite; pointer-events: none; z-index: 15;
         }
         @keyframes fall { to { transform: translateY(105vh); } }
 
-        /* Elementos de la carretera */
-        .road-line { position: absolute; width: 10px; height: 60px; background-color: rgba(255,255,255,0.7); left: 50%; transform: translateX(-50%); border-radius: 4px; }
+        /* Carretera */
+        .road-line { position: absolute; width: 10px; height: 70px; background-color: rgba(255,255,255,0.6); left: 50%; transform: translateX(-50%); border-radius: 4px; }
         
         /* Cabecera */
-        #header { position: absolute; top: 0; width: 100%; height: 80px; background: rgba(255, 255, 255, 0.98); z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 5px 25px rgba(0,0,0,0.5); }
-        #header img { max-height: 60px; max-width: 85%; object-fit: contain; }
+        #header { position: absolute; top: 0; width: 100%; height: 75px; background: rgba(255, 255, 255, 0.95); z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
+        #header img { max-height: 55px; max-width: 85%; object-fit: contain; }
         
         /* JUGADOR */
         #player { 
-            position: absolute; bottom: 120px; left: 50%; 
-            transform: translateX(-50%); transition: left 0.08s ease-out; /* Movimiento más reactivo */
+            position: absolute; bottom: 130px; left: 50%; 
+            transform: translateX(-50%); transition: left 0.07s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
             z-index: 5; width: 80px; height: 80px; 
             display: flex; justify-content: center; align-items: flex-end;
         }
-        .player-emoji { font-size: 65px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.7)); }
+        .player-emoji { font-size: 60px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
         .player-img { 
             width: 75px; height: 75px; border-radius: 50%; 
             border: 3px solid #fff; object-fit: cover; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
             background: #fff;
         }
 
         .obstacle { font-size: 45px; position: absolute; z-index: 4; text-align: center; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
         
         /* Marcador */
-        #score-board { position: absolute; top: 95px; right: 15px; color: #fff; font-weight: 800; font-size: 18px; background: linear-gradient(90deg, #2980b9, #3498db); padding: 8px 18px; border-radius: 50px; z-index: 10; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.4); text-shadow: 1px 1px 2px black;}
+        #score-board { position: absolute; top: 90px; right: 15px; color: #fff; font-weight: 800; font-size: 18px; background: linear-gradient(90deg, #c0392b, #e74c3c); padding: 8px 18px; border-radius: 50px; z-index: 10; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px black;}
         
-        /* Pantallas (Inicio, Game Over, Win) */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 20, 30, 0.97); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(8px); padding: 20px; box-sizing: border-box; }
+        /* PANTALLAS */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 20, 0.97); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box; }
         
-        h1 { color: #3498db; text-transform: uppercase; margin-bottom: 10px; font-size: 28px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
-        p { max-width: 90%; line-height: 1.6; margin: 8px 0; color: #ecf0f1; font-size: 15px; }
+        h1 { color: #3498db; text-transform: uppercase; margin-bottom: 5px; font-size: 26px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; }
+        .subtitle { color: #f1c40f; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
         
         /* SELECTOR DE PERSONAJE */
-        .char-selector { display: flex; gap: 20px; margin: 25px 0; }
+        .char-selector { display: flex; gap: 20px; margin: 20px 0; }
         .char-option { 
-            width: 75px; height: 75px; border-radius: 50%; background: rgba(255,255,255,0.1);
-            border: 4px solid transparent; cursor: pointer; transition: all 0.2s;
+            width: 75px; height: 75px; border-radius: 50%; background: rgba(255,255,255,0.05);
+            border: 4px solid #555; cursor: pointer; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
             position: relative;
         }
         .char-option img { width: 100%; height: 100%; object-fit: cover; }
-        .char-option.selected { border-color: #2ecc71; box-shadow: 0 0 20px #2ecc71; transform: scale(1.15); background: rgba(255,255,255,0.2); }
+        .char-option.selected { border-color: #e74c3c; box-shadow: 0 0 25px rgba(231, 76, 60, 0.6); transform: scale(1.15); background: rgba(255,255,255,0.2); }
         .char-emoji { font-size: 45px; }
+        
+        /* TARJETA DE RESULTADO / FELICITACIÓN (El core del diseño) */
+        .christmas-card {
+            animation: popIn 0.8s ease;
+            background: #fff;
+            color: #333;
+            width: 100%; max-width: 350px;
+            border-radius: 15px;
+            padding: 25px 20px;
+            box-shadow: 0 20px 70px rgba(0,0,0,1);
+            border-top: 10px solid #c0392b; /* Rojo navidad */
+            border-bottom: 10px solid #2980b9; /* Azul CV Tools */
+            position: relative;
+        }
+
+        .card-title { font-size: 28px; color: #c0392b; font-family: serif; font-weight: bold; margin: 10px 0; }
+        .card-score { font-size: 40px; font-weight: 900; color: #2c3e50; margin: 5px 0; }
+        .card-label { font-size: 12px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .card-message { margin: 20px 0; font-size: 15px; line-height: 1.5; color: #555; border-top: 1px solid #eee; padding-top: 15px; }
+        .company-highlight { color: #2980b9; font-weight: 900; font-size: 16px; }
 
         /* Botones */
         button { 
-            background: linear-gradient(180deg, #2980b9 0%, #1a5276 100%); 
-            color: white; border: none; padding: 16px 40px; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold; 
-            box-shadow: 0 6px 0 #154360, 0 15px 20px rgba(0,0,0,0.5); 
-            transition: all 0.1s; text-transform: uppercase; letter-spacing: 1px; width: 80%; max-width: 300px;
+            background: #34495e; 
+            color: white; border: none; padding: 14px 30px; font-size: 16px; 
+            border-radius: 50px; cursor: pointer; margin-top: 10px; font-weight: bold; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+            transition: all 0.1s; text-transform: uppercase; width: 100%;
         }
-        button:active { transform: translateY(6px); box-shadow: 0 0 0 #154360; }
+        button:active { transform: scale(0.98); }
         
-        /* Botón WhatsApp */
+        .btn-play { background: linear-gradient(90deg, #2980b9, #3498db); }
+        
         .btn-whatsapp {
-            background: linear-gradient(180deg, #25D366 0%, #128C7E 100%);
-            font-size: 15px; box-shadow: 0 6px 0 #075E54, 0 15px 20px rgba(0,0,0,0.5);
+            background: linear-gradient(90deg, #25D366, #128C7E);
             display: inline-flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn-whatsapp:active { transform: translateY(6px); box-shadow: 0 0 0 #075E54; }
 
-        /* CAJA DE VICTORIA (Diseño Tarjeta Navidad) */
-        .victory-box { 
-            animation: popIn 0.8s ease; 
-            background: linear-gradient(135deg, #ffffff 0%, #f7f9f9 100%);
-            padding: 30px 20px; border-radius: 20px; 
-            border: 5px solid #2980b9; 
-            max-width: 90%; color: #333; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-        }
-        
-        .victory-logo { max-width: 180px; margin-bottom: 15px; }
-        .victory-avatar-container { font-size: 80px; margin: 10px 0; animation: bounce 2s infinite; display: inline-block; }
-        .victory-avatar-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #2980b9; object-fit: cover; }
-        
-        /* Textos específicos de felicitación */
-        .greeting-text { font-size: 16px; color: #555; margin: 15px 0 5px 0; font-weight: 500; }
-        .company-name { color: #2980b9; font-weight: 900; font-size: 18px; }
-        .merry-christmas { 
-            color: #c0392b; font-size: 32px; font-weight: 900; margin: 10px 0 20px 0; 
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.1); font-family: 'Arial Black', sans-serif; letter-spacing: -1px;
-        }
-
-        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-15px);} }
         @keyframes popIn { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         
         .hidden { display: none !important; }
@@ -121,116 +118,95 @@
             <img src="ANAGRAMA.jpg" alt="CV Tools" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
         </div>
 
-        <div id="score-board">SEÑALES: <span id="score">0</span></div>
+        <div id="score-board">PUNTOS: <span id="score">0</span></div>
         
         <!-- JUGADOR -->
         <div id="player"></div>
 
-        <!-- Pantalla Inicio -->
+        <!-- PANTALLA INICIO -->
         <div id="start-screen" class="screen">
-            <h1 style="color:#fff;">Operación Vial<br><span style="color:#3498db; font-size: 0.8em;">Navidad 2026</span></h1>
-            <p style="color:#aaa;">Selecciona a tu conductor:</p>
+            <h1 style="color:#fff; margin-bottom: 0;">Reto de Navidad</h1>
+            <div class="subtitle">CV TOOLS EDITION</div>
+            
+            <p style="color:#bbb; font-size: 14px;">Elige quién conduce el trineo:</p>
             
             <!-- SELECTOR -->
             <div class="char-selector">
                 <div class="char-option selected" onclick="selectChar('santa', this)">
                     <span class="char-emoji">🎅</span>
                 </div>
-                <!-- PABLO -->
                 <div class="char-option" onclick="selectChar('pablo', this)">
                     <img src="Pablo.png" alt="Pablo" onerror="this.src='https://ui-avatars.com/api/?name=Pablo&background=e74c3c&color=fff&bold=true'">
                 </div>
-                <!-- OLGA -->
                 <div class="char-option" onclick="selectChar('olga', this)">
                     <img src="Olga.png" alt="Olga" onerror="this.src='https://ui-avatars.com/api/?name=Olga&background=9b59b6&color=fff&bold=true'">
                 </div>
             </div>
-            <div id="char-name-display" style="color: #2ecc71; font-weight: bold; margin-bottom: 20px; font-size: 20px; text-transform: uppercase;">SANTA</div>
+            <div id="char-name-display" style="color: #e74c3c; font-weight: bold; margin-bottom: 25px; font-size: 20px; text-transform: uppercase;">SANTA</div>
 
-            <p>Esquiva las señales a alta velocidad.</p>
-            <button onclick="startGame()">▶ JUGAR AHORA</button>
+            <p style="max-width: 300px;">Esquiva las señales. La velocidad aumenta sin parar.<br><strong>¿Quién conseguirá el récord?</strong></p>
+            <button class="btn-play" onclick="startGame()">▶ COMENZAR RETO</button>
         </div>
 
-        <!-- Pantalla Game Over -->
-        <div id="game-over-screen" class="screen hidden">
-            <div style="font-size:70px;">💥</div>
-            <h1 style="color:#e74c3c;">¡ACCIDENTE!</h1>
-            <p>Has chocado contra una señal.</p>
-            <p style="font-size: 20px; margin: 15px 0;">Señales esquivadas: <strong style="color: #f1c40f; font-size: 24px;"><span id="final-score-lose">0</span></strong></p>
-            
-            <button onclick="resetGame()">🔄 REINTENTAR</button>
-            <button class="btn-whatsapp" onclick="shareWhatsapp(false)">💬 Compartir Récord</button>
-        </div>
+        <!-- PANTALLA RESULTADO / FELICITACIÓN (Aparece al chocar) -->
+        <div id="result-screen" class="screen hidden">
+            <!-- Tarjeta Navideña -->
+            <div class="christmas-card">
+                <div class="card-label">Puntuación Final</div>
+                <div class="card-score" id="final-score">0</div>
+                
+                <div class="card-title">¡Feliz Navidad!</div>
+                
+                <div class="card-message">
+                    El equipo de <span class="company-highlight">CV TOOLS</span> te desea unas fiestas llenas de alegría y un feliz 2026.
+                </div>
 
-        <!-- PANTALLA VICTORIA (Felicitación CV Tools) -->
-        <div id="victory-screen" class="screen hidden" style="background: rgba(30, 50, 70, 0.98);">
-            <div class="victory-box">
-                <!-- Logo -->
-                <img src="ANAGRAMA.jpg" class="victory-logo" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
-                
-                <h2 style="color: #2ecc71; margin: 0; font-size: 22px;">¡RETO SUPERADO!</h2>
-                
-                <!-- Avatar Ganador -->
-                <div class="victory-avatar-container" id="victory-avatar">🎅</div>
-                
-                <!-- Puntuación -->
-                <p style="margin:0; font-size: 14px; color:#888;">Puntuación final: <strong style="color:#333;"><span id="final-score-win">0</span></strong></p>
-                
-                <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
-
-                <!-- MENSAJE DE FELICITACIÓN CLARO -->
-                <p class="greeting-text">
-                    El equipo de <span class="company-name">CV TOOLS</span><br>
-                    te felicita las fiestas y te desea...
-                </p>
-                
-                <div class="merry-christmas">¡FELIZ NAVIDAD!</div>
-                
-                <p style="font-size: 13px; font-style: italic; color: #777; margin-bottom: 20px;">
-                    "Por un 2026 con cero incidencias y mucha felicidad."
-                </p>
+                <div style="font-size: 13px; color: #999; margin-bottom: 15px; font-style: italic;">
+                    "Gracias por jugar con nosotros"
+                </div>
 
                 <!-- Botones -->
-                <button onclick="resetGame()" style="font-size: 14px; padding: 12px 20px; width: auto; margin-top: 10px;">🔄 Jugar otra vez</button>
-                <br>
-                <button class="btn-whatsapp" onclick="shareWhatsapp(true)" style="font-size: 14px; padding: 12px 20px; width: auto; margin-top: 10px;">
-                    <span>📱</span> Enviar Felicitación
+                <button class="btn-whatsapp" onclick="shareWhatsapp()">
+                    <span>💬</span> Compartir mi récord
+                </button>
+                <button class="btn-play" style="margin-top: 10px; background: #7f8c8d;" onclick="resetGame()">
+                    🔄 Intentar superar
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        /* --- CONFIGURACIÓN DE DIFICULTAD --- */
-        const WIN_SCORE = 15;   // Aumentado a 15 para que dure más
-        const INITIAL_SPEED = 8; // Velocidad inicial más rápida (antes 6)
-        const SPAWN_RATE = 45;   // Aparecen obstáculos más rápido (antes 60)
+        /* --- CONFIGURACIÓN --- */
+        const INITIAL_SPEED = 8;
+        const INITIAL_SPAWN_RATE = 45; // Frames entre obstáculos
+        const MAX_SPEED = 20; // Velocidad máxima (muy difícil)
+        const MIN_SPAWN_RATE = 20; // Obstáculos muy seguidos
         
-        /* ELEMENTOS DOM */
+        /* DOM */
         const container = document.getElementById('game-container');
         const playerEl = document.getElementById('player');
         const scoreEl = document.getElementById('score');
-        const screens = {
-            start: document.getElementById('start-screen'),
-            over: document.getElementById('game-over-screen'),
-            win: document.getElementById('victory-screen')
-        };
-        const victoryAvatar = document.getElementById('victory-avatar');
+        const startScreen = document.getElementById('start-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const finalScoreEl = document.getElementById('final-score');
 
-        /* VARIABLES DE JUEGO */
+        /* VARIABLES */
         let gameRunning = false;
         let score = 0;
         let playerPos = 50; 
         let obstacles = [];
         let roadLines = [];
+        
+        // Variables de dificultad
         let gameSpeed = INITIAL_SPEED;
-        let spawnRate = SPAWN_RATE;
+        let spawnRate = INITIAL_SPAWN_RATE;
         let frameCount = 0;
         let animId;
         
         let currentDriver = { type: 'emoji', val: '🎅', name: 'SANTA' };
 
-        /* EFECTO NIEVE */
+        /* NIEVE (Efecto Navideño) */
         function createSnow() {
             setInterval(() => {
                 const flake = document.createElement('div');
@@ -240,11 +216,11 @@
                 flake.style.animationDuration = (Math.random() * 2 + 2) + 's';
                 container.appendChild(flake);
                 setTimeout(() => flake.remove(), 4000);
-            }, 200);
+            }, 100);
         }
         createSnow();
 
-        /* SELECCIÓN PERSONAJE */
+        /* SELECCIÓN DE PERSONAJE */
         function selectChar(charType, element) {
             document.querySelectorAll('.char-option').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
@@ -272,20 +248,12 @@
                 span.className = 'player-emoji';
                 span.innerText = currentDriver.val;
                 playerEl.appendChild(span);
-                victoryAvatar.innerText = currentDriver.val; 
-                victoryAvatar.innerHTML = currentDriver.val;
             } else {
                 const img = document.createElement('img');
                 img.className = 'player-img';
                 img.src = currentDriver.val;
                 img.onerror = function() { this.src = `https://ui-avatars.com/api/?name=${currentDriver.name}&background=random&color=fff`; };
                 playerEl.appendChild(img);
-                
-                // Avatar en victoria
-                victoryAvatar.innerHTML = '';
-                const winImg = img.cloneNode(true);
-                winImg.className = 'victory-avatar-img';
-                victoryAvatar.appendChild(winImg);
             }
         }
 
@@ -299,7 +267,6 @@
             if (e.key === 'ArrowRight') moveRight();
         });
 
-        // Soporte táctil mejorado
         container.addEventListener('click', (e) => {
             if(e.target.tagName === 'BUTTON' || e.target.closest('.char-option')) return;
             if (!gameRunning) return;
@@ -311,19 +278,18 @@
 
         function updatePlayerPos() { playerEl.style.left = playerPos + '%'; }
 
-        /* LÓGICA DE JUEGO */
+        /* CONTROL DEL JUEGO */
         function startGame() {
             renderPlayer();
-            screens.start.classList.add('hidden');
+            startScreen.classList.add('hidden');
             resetVariables();
             gameRunning = true;
             gameLoop();
         }
 
         function resetGame() {
-            screens.over.classList.add('hidden');
-            screens.win.classList.add('hidden');
-            screens.start.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
         }
 
         function resetVariables() {
@@ -335,7 +301,7 @@
             
             // RESETEO DE DIFICULTAD
             gameSpeed = INITIAL_SPEED; 
-            spawnRate = SPAWN_RATE; 
+            spawnRate = INITIAL_SPAWN_RATE; 
             frameCount = 0;
             
             if(animId) cancelAnimationFrame(animId);
@@ -348,53 +314,52 @@
             el.innerText = types[Math.floor(Math.random() * types.length)];
             const lanes = [10, 30, 50, 70, 90];
             const lane = lanes[Math.floor(Math.random() * lanes.length)];
-            el.style.left = lane + '%'; el.style.top = '-70px';
+            el.style.left = lane + '%'; el.style.top = '-80px';
             container.appendChild(el);
-            obstacles.push({ el, top: -70, lane });
+            obstacles.push({ el, top: -80, lane });
         }
 
         function gameLoop() {
             if (!gameRunning) return;
             frameCount++;
             
-            // Generar Obstáculos
-            if (frameCount % spawnRate === 0) createObstacle();
+            // 1. GENERACIÓN
+            if (frameCount % Math.floor(spawnRate) === 0) createObstacle();
             
-            // Generar Líneas
-            if (frameCount % 10 === 0) { // Líneas más rápidas
+            if (frameCount % 10 === 0) { 
                 const l = document.createElement('div');
-                l.className = 'road-line'; l.style.top = '-60px';
+                l.className = 'road-line'; l.style.top = '-70px';
                 container.appendChild(l);
-                roadLines.push({ el: l, top: -60 });
+                roadLines.push({ el: l, top: -70 });
             }
             
-            // AUMENTAR DIFICULTAD CADA POCO TIEMPO
-            if (frameCount % 200 === 0) {
-                gameSpeed += 0.5; // Acelera más rápido
-                if(spawnRate > 25) spawnRate -= 2; // Salen más seguidos
+            // 2. DIFICULTAD CRECIENTE (Cada 5 segundos aprox)
+            if (frameCount % 300 === 0) {
+                if (gameSpeed < MAX_SPEED) gameSpeed += 1; // Más rápido
+                if (spawnRate > MIN_SPAWN_RATE) spawnRate -= 2; // Más obstáculos
             }
 
-            // Mover Obstáculos
+            // 3. FÍSICAS Y COLISIONES
+            // Obstáculos
             obstacles.forEach((obs, i) => {
                 obs.top += gameSpeed;
                 obs.el.style.top = obs.top + 'px';
                 
-                // Colisión (Hitbox ajustada para dificultad)
-                if (obs.top > container.offsetHeight - 150 && obs.top < container.offsetHeight - 50) {
+                // Colisión (Hitbox vertical: entre 140px y 50px del fondo)
+                if (obs.top > container.offsetHeight - 140 && obs.top < container.offsetHeight - 50) {
                     if (Math.abs(obs.lane - playerPos) < 15) {
-                        gameOver();
+                        finishGame(); // CHOCÓ
                     }
                 }
-                // Punto
+                
+                // Salir de pantalla (Punto)
                 if (obs.top > container.offsetHeight) {
                     obs.el.remove(); obstacles.splice(i, 1);
                     score++; scoreEl.innerText = score;
-                    // Victoria
-                    if(score >= WIN_SCORE) gameWin();
                 }
             });
 
-            // Mover Líneas
+            // Líneas carretera
             roadLines.forEach((l, i) => {
                 l.top += gameSpeed; l.el.style.top = l.top + 'px';
                 if (l.top > container.offsetHeight) { l.el.remove(); roadLines.splice(i, 1); }
@@ -403,44 +368,35 @@
             if (gameRunning) animId = requestAnimationFrame(gameLoop);
         }
 
-        function gameOver() {
+        /* FIN DEL JUEGO Y FELICITACIÓN */
+        function finishGame() {
             gameRunning = false;
-            document.getElementById('final-score-lose').innerText = score;
-            screens.over.classList.remove('hidden');
-        }
-
-        function gameWin() {
-            gameRunning = false;
-            document.getElementById('final-score-win').innerText = score;
-            screens.win.classList.remove('hidden');
+            finalScoreEl.innerText = score;
+            resultScreen.classList.remove('hidden');
+            
+            // Lanzar confeti navideño aunque haya perdido (¡Es Navidad!)
             launchConfetti();
         }
 
         /* WHATSAPP SHARE */
-        function shareWhatsapp(won) {
+        function shareWhatsapp() {
             const driverName = currentDriver.name;
-            let text = "";
-            
-            if (won) {
-                text = `🎄 ¡CV TOOLS CHALLENGE COMPLETADO! 🎄\n\nHe superado el reto navideño con ${driverName} consiguiendo la máxima puntuación.\n\n¡El equipo de CV Tools os desea Felices Fiestas!\n\nJuega aquí:`;
-            } else {
-                text = `🎄 ¡Reto CV TOOLS! 🎄\n\nHe conseguido ${score} señales esquivadas con ${driverName}.\n\n¿Puedes superarme?\n\nJuega aquí:`;
-            }
-            
+            const text = `🎅 Reto Navidad CV TOOLS 🎅\n\n¡He conseguido ${score} puntos conduciendo con ${driverName}!\n\n¿Puedes superar mi marca?\n\n¡Felices Fiestas! 🎄\n\nJuega aquí:`;
             const url = window.location.href;
             const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`;
             window.open(waUrl, '_blank');
         }
 
-        /* CONFETI FINAL */
+        /* CONFETI */
         function launchConfetti() {
-            const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#ffffff'];
-            for (let i = 0; i < 80; i++) {
+            const colors = ['#e74c3c', '#2ecc71', '#f1c40f', '#3498db', '#ffffff'];
+            for (let i = 0; i < 60; i++) {
                 const c = document.createElement('div');
                 c.style.position = 'absolute'; c.style.width='8px'; c.style.height='8px';
                 c.style.background = colors[Math.floor(Math.random()*colors.length)];
                 c.style.left = Math.random()*100+'%'; c.style.top='-10px';
                 c.style.zIndex = 30;
+                c.style.borderRadius = '50%';
                 c.style.animation = `fall ${Math.random()*2+1}s linear`;
                 container.appendChild(c);
             }
