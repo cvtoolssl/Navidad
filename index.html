@@ -2,89 +2,101 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CV Tools - Santa Road Safety</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CV Tools - Operación Vial</title>
     <style>
-        /* --- ESTILOS GENERALES (CSS) --- */
-        body { margin: 0; background-color: #1e1e1e; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; touch-action: none; }
-        #game-container { position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; background-color: #333; overflow: hidden; border-left: 5px solid #fff; border-right: 5px solid #fff; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        /* --- ESTILOS GENERALES --- */
+        body { margin: 0; background-color: #1e1e1e; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
         
-        /* Carretera */
-        .road-line { position: absolute; width: 10px; height: 40px; background-color: rgba(255,255,255,0.6); left: 50%; transform: translateX(-50%); }
-        
-        /* Cabecera con Logo */
-        #header { position: absolute; top: 0; width: 100%; height: 70px; background: rgba(255, 255, 255, 0.95); z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        #header img { max-height: 50px; max-width: 80%; }
-        
-        /* Elementos del juego */
-        #santa { font-size: 50px; position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); transition: left 0.1s; z-index: 5; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
-        .obstacle { font-size: 40px; position: absolute; z-index: 4; text-align: center; }
-        
-        /* Interfaz Puntos */
-        #score-board { position: absolute; top: 85px; right: 10px; color: #fff; font-weight: bold; font-size: 16px; background: rgba(41, 128, 185, 0.9); padding: 8px 15px; border-radius: 20px; z-index: 10; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        
-        /* --- PANTALLAS (Inicio, Game Over, Victoria) --- */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.92); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(5px); }
-        
-        h1 { color: #f1c40f; text-transform: uppercase; margin-bottom: 10px; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); letter-spacing: 1px; }
-        p { max-width: 85%; line-height: 1.6; margin: 5px 0; color: #e0e0e0; }
-        
-        /* Botones */
-        button { background: linear-gradient(to bottom, #3498db, #2980b9); color: white; border: none; padding: 15px 40px; font-size: 18px; border-radius: 50px; cursor: pointer; margin-top: 25px; font-weight: bold; box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4); transition: transform 0.1s; text-transform: uppercase; letter-spacing: 1px; border: 2px solid rgba(255,255,255,0.2); }
-        button:active { transform: scale(0.95); }
-        .controls-hint { margin-top: 30px; color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* --- ESTILOS DE VICTORIA (CORREGIDOS) --- */
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-30px);}
-            60% {transform: translateY(-15px);}
+        #game-container { 
+            position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; 
+            background: linear-gradient(to bottom, #2c3e50, #1a252f);
+            overflow: hidden; border-left: 5px solid #fff; border-right: 5px solid #fff; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
         }
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        
+        /* Efecto Nieve */
+        .snowflake {
+            position: absolute; top: -10px; background: white; border-radius: 50%; opacity: 0.8;
+            animation: fall linear infinite; pointer-events: none; z-index: 15;
+        }
+        @keyframes fall { to { transform: translateY(105vh); } }
+
+        /* Elementos de la carretera */
+        .road-line { position: absolute; width: 8px; height: 50px; background-color: rgba(255,255,255,0.6); left: 50%; transform: translateX(-50%); border-radius: 4px; }
+        
+        /* Cabecera */
+        #header { position: absolute; top: 0; width: 100%; height: 75px; background: rgba(255, 255, 255, 0.95); z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+        #header img { max-height: 55px; max-width: 85%; object-fit: contain; }
+        
+        /* JUGADOR (Santa/Pablo/Olga) */
+        #player { 
+            position: absolute; bottom: 110px; left: 50%; 
+            transform: translateX(-50%); transition: left 0.1s ease-out; 
+            z-index: 5; width: 80px; height: 80px; 
+            display: flex; justify-content: center; align-items: flex-end;
+        }
+        /* Estilos para cuando es Emoji */
+        .player-emoji { font-size: 60px; filter: drop-shadow(0 10px 5px rgba(0,0,0,0.5)); }
+        /* Estilos para cuando es Foto (Pablo/Olga) */
+        .player-img { 
+            width: 70px; height: 70px; border-radius: 50%; 
+            border: 3px solid #fff; object-fit: cover; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+            background: #fff;
         }
 
-        .victory-box { 
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            padding: 30px 20px; 
-            border-radius: 20px; 
-            border: 5px solid #2980b9; 
-            max-width: 85%; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7); 
+        .obstacle { font-size: 42px; position: absolute; z-index: 4; text-align: center; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
+        
+        /* Marcador */
+        #score-board { position: absolute; top: 90px; right: 15px; color: #fff; font-weight: 800; font-size: 16px; background: linear-gradient(90deg, #2980b9, #3498db); padding: 8px 15px; border-radius: 50px; z-index: 10; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        /* Pantallas */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 25, 35, 0.96); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(5px); }
+        
+        h1 { color: #f1c40f; text-transform: uppercase; margin-bottom: 10px; font-size: 26px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); letter-spacing: 1px; }
+        p { max-width: 85%; line-height: 1.5; margin: 5px 0; color: #ecf0f1; font-size: 14px; }
+        
+        /* SELECTOR DE PERSONAJE */
+        .char-selector { display: flex; gap: 15px; margin: 20px 0; }
+        .char-option { 
+            width: 70px; height: 70px; border-radius: 50%; background: rgba(255,255,255,0.1);
+            border: 3px solid transparent; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
             position: relative;
-            z-index: 30;
-            
-            /* CENTRADO PERFECTO */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
         }
+        .char-option img { width: 100%; height: 100%; object-fit: cover; }
+        .char-option.selected { border-color: #2ecc71; box-shadow: 0 0 15px #2ecc71; transform: scale(1.1); background: rgba(255,255,255,0.2); }
+        .char-emoji { font-size: 40px; }
+        .char-label { position: absolute; bottom: -25px; font-size: 12px; width: 100%; text-align: center; color: #aaa; }
 
-        .victory-box h1, .victory-box h2, .victory-box p {
-            text-align: center; /* Asegura que el texto interno esté centrado */
-            width: 100%;
+        /* Botones */
+        button { 
+            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%); 
+            color: white; border: none; padding: 15px 35px; font-size: 18px; 
+            border-radius: 50px; cursor: pointer; margin-top: 25px; font-weight: bold; 
+            box-shadow: 0 5px 0 #1a5276, 0 10px 20px rgba(0,0,0,0.4); 
+            transition: all 0.1s; text-transform: uppercase; letter-spacing: 1px; 
         }
-
-        .santa-victory { 
-            font-size: 90px; 
-            margin: 10px 0; 
-            display: inline-block; 
-            animation: bounce 2s infinite; 
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
+        button:active { transform: translateY(5px); box-shadow: 0 0 0 #1a5276; }
+        
+        /* Botón WhatsApp */
+        .btn-whatsapp {
+            background: linear-gradient(180deg, #25D366 0%, #128C7E 100%);
+            font-size: 14px; padding: 12px 25px; margin-top: 15px;
+            box-shadow: 0 5px 0 #075E54, 0 10px 20px rgba(0,0,0,0.4);
+            display: inline-flex; align-items: center; gap: 8px;
         }
+        .btn-whatsapp:active { transform: translateY(5px); box-shadow: 0 0 0 #075E54; }
 
-        .logo-victory {
-            max-width: 180px;
-            margin-bottom: 15px;
-            display: block;
-        }
+        /* Animaciones */
+        .victory-box { animation: popIn 0.7s ease; background: white; padding: 25px; border-radius: 20px; border-bottom: 6px solid #bdc3c7; max-width: 85%; color: #333; }
+        .santa-victory { font-size: 80px; margin: 10px 0; animation: bounce 2s infinite; }
+        .logo-victory { max-width: 160px; margin-bottom: 10px; }
 
-        /* Confeti */
-        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 25; }
-        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
-
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -93,210 +105,312 @@
     <div id="game-container">
         <!-- CABECERA -->
         <div id="header">
-            <!-- LOGO PEQUEÑO (Juego) -->
             <img src="ANAGRAMA.jpg" alt="CV Tools" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
         </div>
 
-        <div id="score-board">Señales: <span id="score">0</span> / 10</div>
-        <div id="santa">🎅🛷</div>
+        <div id="score-board">PUNTOS: <span id="score">0</span></div>
+        
+        <!-- JUGADOR (Se rellena por JS) -->
+        <div id="player"></div>
 
-        <!-- Pantalla de Inicio -->
+        <!-- Pantalla Inicio -->
         <div id="start-screen" class="screen">
-            <h1 style="color:#3498db;">Operación<br>Vial Navideña</h1>
-            <p>¡Hola compañero!</p>
-            <p>El tráfico está fatal. Ayuda a Santa a entregar la Navidad a tiempo.</p>
-            <p style="font-size: 14px; color: #aaa; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 10px; margin-top:15px;">🎯 Misión: Esquiva 10 señales</p>
-            <button onclick="startGame()">▶ ARRANCAR</button>
-            <div class="controls-hint">⬅️ Toca los lados para moverte ➡️</div>
+            <h1 style="color:#3498db; margin-top: 0;">Operación Vial</h1>
+            <p>¡Elige a tu conductor!</p>
+            
+            <!-- SELECTOR DE PERSONAJE -->
+            <div class="char-selector">
+                <!-- Opción 1: Santa -->
+                <div class="char-option selected" onclick="selectChar('santa', this)">
+                    <span class="char-emoji">🎅</span>
+                </div>
+                <!-- Opción 2: Pablo (Usa Pablo.png) -->
+                <div class="char-option" onclick="selectChar('pablo', this)">
+                    <!-- El onerror es por si no encuentra la imagen al probar en CodePen -->
+                    <img src="Pablo.png" onerror="this.src='https://ui-avatars.com/api/?name=Pablo&background=e74c3c&color=fff'">
+                </div>
+                <!-- Opción 3: Olga (Usa Olga.png) -->
+                <div class="char-option" onclick="selectChar('olga', this)">
+                    <img src="Olga.png" onerror="this.src='https://ui-avatars.com/api/?name=Olga&background=9b59b6&color=fff'">
+                </div>
+            </div>
+            <div id="char-name-display" style="color: #2ecc71; font-weight: bold; margin-bottom: 10px;">SANTA</div>
+
+            <p style="font-size: 13px; color:#aaa;">Esquiva las señales y consigue puntos.</p>
+            <button onclick="startGame()">▶ JUGAR</button>
         </div>
 
         <!-- Pantalla Game Over -->
         <div id="game-over-screen" class="screen hidden">
-            <h1>⛔ SANTA SE LA HA PEGADO ⛔</h1>
-            <p>Te has comido una señal.</p>
-            <p style="font-size: 20px; color: #f1c40f; font-weight: bold;">Score: <span id="final-score">0</span></p>
-            <button onclick="startGame()">🔄 REINTENTAR</button>
+            <div style="font-size:60px;">💥</div>
+            <h1>¡ACCIDENTE!</h1>
+            <p>Has chocado contra una señal.</p>
+            <p style="font-size: 24px; color: #f1c40f; font-weight: bold; margin: 10px 0;">Puntos: <span id="final-score-lose">0</span></p>
+            
+            <button onclick="resetGame()">🔄 REINTENTAR</button>
+            <button class="btn-whatsapp" onclick="shareWhatsapp()">💬 Retar a amigos</button>
         </div>
 
-        <!-- PANTALLA DE VICTORIA (CV TOOLS FELICITA) -->
-        <div id="victory-screen" class="screen hidden" style="background: rgba(41, 128, 185, 0.9);">
+        <!-- PANTALLA VICTORIA (Al llegar a 15 Puntos por ejemplo, o modo infinito) -->
+        <div id="victory-screen" class="screen hidden" style="background: rgba(41, 128, 185, 0.95);">
             <div class="victory-box">
-                <!-- LOGO GRANDE (Victoria) -->
-                <img src="ANAGRAMA.jpg" alt="CV Tools Logo" class="logo-victory" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
+                <img src="ANAGRAMA.jpg" class="logo-victory" onerror="this.src='https://via.placeholder.com/300x80/ffffff/2980b9?text=CV+Tools'">
                 
-                <h2 style="color: #2c3e50; margin: 5px 0 0 0; font-size: 24px;">¡MISIÓN CUMPLIDA!</h2>
+                <h2 style="color: #2c3e50; margin: 0;">¡GRAN TRABAJO!</h2>
+                <div class="santa-victory" id="victory-avatar">🎅</div>
                 
-                <!-- Santa saliendo del carro y saludando -->
-                <div class="santa-victory">🎅🎉</div>
+                <p>Has demostrado ser un conductor experto en CV TOOLS.</p>
+                <h2 style="color: #e67e22;">Puntos: <span id="final-score-win">0</span></h2>
                 
-                <p style="font-size: 16px; margin: 10px 0; color: #555; line-height: 1.4;">
-                    El equipo de <strong>CV TOOLS</strong> te desea unas fiestas llenas de alegría.
-                </p>
-                
-                <h1 style="color: #c0392b; margin: 10px 0; font-size: 32px;">¡FELIZ NAVIDAD!</h1>
-                
-                <button onclick="startGame()" style="background: #27ae60; padding: 12px 30px; font-size: 15px; margin-top: 15px;">🔄 JUGAR OTRA VEZ</button>
+                <button onclick="resetGame()" style="font-size: 14px; padding: 10px 20px;">🔄 Jugar de nuevo</button>
+                <br>
+                <!-- BOTÓN WHATSAPP -->
+                <button class="btn-whatsapp" onclick="shareWhatsapp()">
+                    <span style="font-size: 18px;">📱</span> Compartir en WhatsApp
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        /* --- LÓGICA DEL JUEGO (JAVASCRIPT) --- */
-        const container = document.getElementById('game-container');
-        const santa = document.getElementById('santa');
-        const scoreEl = document.getElementById('score');
-        const finalScoreEl = document.getElementById('final-score');
+        /* CONFIGURACIÓN */
+        const WIN_SCORE = 10; // Puntos para que salga la pantalla de felicitación "Misión Cumplida"
         
-        // Pantallas
-        const startScreen = document.getElementById('start-screen');
-        const gameOverScreen = document.getElementById('game-over-screen');
-        const victoryScreen = document.getElementById('victory-screen');
+        /* ELEMENTOS */
+        const container = document.getElementById('game-container');
+        const playerEl = document.getElementById('player');
+        const scoreEl = document.getElementById('score');
+        const screens = {
+            start: document.getElementById('start-screen'),
+            over: document.getElementById('game-over-screen'),
+            win: document.getElementById('victory-screen')
+        };
+        const victoryAvatar = document.getElementById('victory-avatar');
 
+        /* ESTADO DEL JUEGO */
         let gameRunning = false;
         let score = 0;
-        const WIN_SCORE = 10; // Puntos para ganar
-        
-        let santaPos = 50; 
+        let playerPos = 50; 
         let obstacles = [];
         let roadLines = [];
-        let gameSpeed = 5;
+        let gameSpeed = 6;
         let spawnRate = 60;
         let frameCount = 0;
-        let animationFrameId;
+        let animId;
+        
+        // Personaje seleccionado por defecto
+        let currentDriver = { type: 'emoji', val: '🎅', name: 'SANTA' };
 
-        // --- CONTROLES ---
+        /* NIEVE DE FONDO */
+        function createSnow() {
+            setInterval(() => {
+                const flake = document.createElement('div');
+                flake.className = 'snowflake';
+                flake.style.left = Math.random() * 100 + '%';
+                flake.style.width = flake.style.height = (Math.random() * 5 + 2) + 'px';
+                flake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                container.appendChild(flake);
+                setTimeout(() => flake.remove(), 5000);
+            }, 300);
+        }
+        createSnow();
+
+        /* SELECCIÓN DE PERSONAJE */
+        function selectChar(charType, element) {
+            // Quitar clase selected de todos
+            document.querySelectorAll('.char-option').forEach(el => el.classList.remove('selected'));
+            // Añadir al clickado
+            element.classList.add('selected');
+
+            // Lógica de selección
+            const nameDisplay = document.getElementById('char-name-display');
+            
+            if (charType === 'santa') {
+                currentDriver = { type: 'emoji', val: '🎅', name: 'SANTA' };
+                nameDisplay.style.color = '#e74c3c';
+            } else if (charType === 'pablo') {
+                // Asegúrate de que Pablo.png está en la misma carpeta
+                currentDriver = { type: 'img', val: 'Pablo.png', name: 'PABLO' };
+                nameDisplay.style.color = '#3498db';
+            } else if (charType === 'olga') {
+                // Asegúrate de que Olga.png está en la misma carpeta
+                currentDriver = { type: 'img', val: 'Olga.png', name: 'OLGA' };
+                nameDisplay.style.color = '#9b59b6';
+            }
+            nameDisplay.innerText = currentDriver.name;
+        }
+
+        /* RENDERIZAR JUGADOR */
+        function renderPlayer() {
+            playerEl.innerHTML = ''; // Limpiar
+            if (currentDriver.type === 'emoji') {
+                const span = document.createElement('span');
+                span.className = 'player-emoji';
+                span.innerText = currentDriver.val;
+                playerEl.appendChild(span);
+                victoryAvatar.innerText = currentDriver.val; // Para pantalla victoria
+                victoryAvatar.innerHTML = currentDriver.val;
+            } else {
+                const img = document.createElement('img');
+                img.className = 'player-img';
+                img.src = currentDriver.val;
+                // Fallback si falla la carga local
+                img.onerror = function() { 
+                    this.src = `https://ui-avatars.com/api/?name=${currentDriver.name}&background=random&color=fff`; 
+                };
+                playerEl.appendChild(img);
+                
+                // Para pantalla victoria (clonamos la imagen)
+                victoryAvatar.innerHTML = '';
+                const winImg = img.cloneNode(true);
+                winImg.style.width = '100px'; winImg.style.height = '100px';
+                victoryAvatar.appendChild(winImg);
+            }
+        }
+
+        /* CONTROLES */
+        function moveLeft() { if(playerPos > 15) playerPos -= 20; updatePlayerPos(); }
+        function moveRight() { if(playerPos < 85) playerPos += 20; updatePlayerPos(); }
+        
         document.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
-            if (e.key === 'ArrowLeft' && santaPos > 10) santaPos -= 20;
-            if (e.key === 'ArrowRight' && santaPos < 90) santaPos += 20;
-            updateSanta();
+            if (e.key === 'ArrowLeft') moveLeft();
+            if (e.key === 'ArrowRight') moveRight();
         });
 
-        container.addEventListener('click', (e) => {
-            if(e.target.tagName === 'BUTTON') return;
+        container.addEventListener('touchstart', handleTouch, false);
+        container.addEventListener('click', handleTouch, false);
+
+        function handleTouch(e) {
+            if(e.target.tagName === 'BUTTON' || e.target.closest('.char-option')) return;
             if (!gameRunning) return;
+            e.preventDefault(); // Evitar scroll
             const rect = container.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            if (clickX < rect.width / 2 && santaPos > 10) santaPos -= 20;
-            else if (clickX > rect.width / 2 && santaPos < 90) santaPos += 20;
-            updateSanta();
-        });
+            // Soporte para touch y click mouse
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            
+            if ((clientX - rect.left) < rect.width / 2) moveLeft();
+            else moveRight();
+        }
 
-        function updateSanta() {
-            santa.style.left = santaPos + '%';
+        function updatePlayerPos() { playerEl.style.left = playerPos + '%'; }
+
+        /* BUCLE DE JUEGO */
+        function startGame() {
+            renderPlayer(); // Dibujar a Pablo, Olga o Santa
+            screens.start.classList.add('hidden');
+            resetVariables();
+            gameRunning = true;
+            gameLoop();
+        }
+
+        function resetGame() {
+            screens.over.classList.add('hidden');
+            screens.win.classList.add('hidden');
+            screens.start.classList.remove('hidden');
+        }
+
+        function resetVariables() {
+            score = 0; scoreEl.innerText = score;
+            playerPos = 50; updatePlayerPos();
+            obstacles.forEach(o => o.el.remove());
+            roadLines.forEach(l => l.el.remove());
+            obstacles = []; roadLines = [];
+            gameSpeed = 6; spawnRate = 60; frameCount = 0;
+            if(animId) cancelAnimationFrame(animId);
         }
 
         function createObstacle() {
             const el = document.createElement('div');
             el.className = 'obstacle';
-            const types = ['🚧', '⛔', '🛑', '⚠️']; 
+            const types = ['🚧', '⛔', '🛑', '⚠️'];
             el.innerText = types[Math.floor(Math.random() * types.length)];
             const lanes = [10, 30, 50, 70, 90];
             const lane = lanes[Math.floor(Math.random() * lanes.length)];
-            el.style.left = lane + '%';
-            el.style.top = '-50px';
+            el.style.left = lane + '%'; el.style.top = '-60px';
             container.appendChild(el);
-            obstacles.push({ el: el, top: -50, lane: lane });
-        }
-
-        function createRoadLine() {
-            const el = document.createElement('div');
-            el.className = 'road-line';
-            el.style.top = '-50px';
-            container.appendChild(el);
-            roadLines.push({ el: el, top: -50 });
-        }
-
-        function startGame() {
-            gameRunning = true;
-            score = 0;
-            scoreEl.innerText = score;
-            startScreen.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
-            victoryScreen.classList.add('hidden');
-            
-            // Borrar confeti si hay
-            document.querySelectorAll('.confetti').forEach(c => c.remove());
-
-            gameSpeed = 6;
-            spawnRate = 60;
-            obstacles.forEach(o => o.el.remove());
-            roadLines.forEach(l => l.el.remove());
-            obstacles = [];
-            roadLines = [];
-            santaPos = 50;
-            updateSanta();
-            
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            gameLoop();
-        }
-
-        function gameOver() {
-            gameRunning = false;
-            finalScoreEl.innerText = score;
-            gameOverScreen.classList.remove('hidden');
-            cancelAnimationFrame(animationFrameId);
-        }
-
-        function winGame() {
-            gameRunning = false;
-            victoryScreen.classList.remove('hidden');
-            cancelAnimationFrame(animationFrameId);
-            launchConfetti(); // LANZAR EFECTO
-        }
-
-        // --- SISTEMA DE CONFETI CASERO ---
-        function launchConfetti() {
-            const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'];
-            for (let i = 0; i < 50; i++) {
-                const conf = document.createElement('div');
-                conf.className = 'confetti';
-                conf.style.left = Math.random() * 100 + '%';
-                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                conf.style.animationDuration = (Math.random() * 2 + 2) + 's'; // 2-4 segs
-                conf.style.top = -10 + 'px';
-                container.appendChild(conf);
-            }
+            obstacles.push({ el, top: -60, lane });
         }
 
         function gameLoop() {
             if (!gameRunning) return;
             frameCount++;
-
+            
+            // Generar cosas
             if (frameCount % spawnRate === 0) createObstacle();
-            if (frameCount % 15 === 0) createRoadLine();
-
+            if (frameCount % 15 === 0) {
+                const l = document.createElement('div');
+                l.className = 'road-line'; l.style.top = '-50px';
+                container.appendChild(l);
+                roadLines.push({ el: l, top: -50 });
+            }
+            // Dificultad progresiva
             if (frameCount % 400 === 0) gameSpeed += 0.5;
 
             // Mover Obstáculos
-            obstacles.forEach((obs, index) => {
+            obstacles.forEach((obs, i) => {
                 obs.top += gameSpeed;
                 obs.el.style.top = obs.top + 'px';
-
-                if (obs.top > container.offsetHeight - 130 && obs.top < container.offsetHeight - 50) {
-                    if (Math.abs(obs.lane - santaPos) < 10) gameOver();
+                
+                // Colisión (Caja de impacto)
+                if (obs.top > container.offsetHeight - 140 && obs.top < container.offsetHeight - 60) {
+                    if (Math.abs(obs.lane - playerPos) < 15) {
+                        gameOver();
+                    }
                 }
-
+                // Punto
                 if (obs.top > container.offsetHeight) {
-                    obs.el.remove();
-                    obstacles.splice(index, 1);
-                    score++;
-                    scoreEl.innerText = score;
-                    if (score >= WIN_SCORE) winGame();
+                    obs.el.remove(); obstacles.splice(i, 1);
+                    score++; scoreEl.innerText = score;
+                    // Condición de Victoria
+                    if(score === WIN_SCORE) gameWin();
                 }
             });
 
             // Mover Líneas
-            roadLines.forEach((line, index) => {
-                line.top += gameSpeed;
-                line.el.style.top = line.top + 'px';
-                if (line.top > container.offsetHeight) {
-                    line.el.remove();
-                    roadLines.splice(index, 1);
-                }
+            roadLines.forEach((l, i) => {
+                l.top += gameSpeed; l.el.style.top = l.top + 'px';
+                if (l.top > container.offsetHeight) { l.el.remove(); roadLines.splice(i, 1); }
             });
 
-            animationFrameId = requestAnimationFrame(gameLoop);
+            if (gameRunning) animId = requestAnimationFrame(gameLoop);
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('final-score-lose').innerText = score;
+            screens.over.classList.remove('hidden');
+        }
+
+        function gameWin() {
+            gameRunning = false;
+            document.getElementById('final-score-win').innerText = score;
+            screens.win.classList.remove('hidden');
+            launchConfetti();
+        }
+
+        /* COMPARTIR EN WHATSAPP */
+        function shareWhatsapp() {
+            const driverName = currentDriver.name;
+            const text = `🎄 ¡Reto CV TOOLS! 🎄\n\nHe conseguido ${score} puntos esquivando señales con ${driverName}.\n\n¿Eres capaz de superarme?\n\nJuega aquí:`;
+            const url = window.location.href; // Enlace actual
+            
+            // Construir URL de WhatsApp
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        /* CONFETI */
+        function launchConfetti() {
+            const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71'];
+            for (let i = 0; i < 50; i++) {
+                const c = document.createElement('div');
+                c.style.position = 'absolute'; c.style.width='10px'; c.style.height='10px';
+                c.style.background = colors[Math.floor(Math.random()*colors.length)];
+                c.style.left = Math.random()*100+'%'; c.style.top='-10px';
+                c.style.animation = `fall ${Math.random()*2+2}s linear`;
+                container.appendChild(c);
+            }
         }
     </script>
 </body>
