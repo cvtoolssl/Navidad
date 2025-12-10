@@ -12,13 +12,22 @@
             position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; 
             overflow: hidden; border-left: 5px solid #555; border-right: 5px solid #555; 
             box-shadow: 0 0 80px rgba(0,0,0,0.9); 
-            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364); /* Cielo nocturno */
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364); 
         }
+
+        /* BOTÓN DE MÚSICA */
+        #music-btn {
+            position: absolute; top: 15px; right: 15px; z-index: 50;
+            background: rgba(0,0,0,0.6); border: 2px solid #fff; color: #fff;
+            padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer;
+            text-transform: uppercase; font-weight: bold; width: auto; margin: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: all 0.2s;
+        }
+        #music-btn:hover { background: rgba(255,255,255,0.2); }
+        #music-btn.active { background: #2ecc71; border-color: #2ecc71; }
 
         /* --- FONDO PARALLAX --- */
         .parallax-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; }
-        
-        /* Capa 1: Montañas */
         .bg-mountains {
             background-image: linear-gradient(to bottom, transparent 60%, #0a0a0a 60%), 
                               linear-gradient(135deg, transparent 45%, #151515 50%, transparent 55%), 
@@ -26,7 +35,6 @@
             background-size: 100% 100%, 120px 100px, 120px 100px;
             background-position: 0 0, 0 100%, 60px 100%; opacity: 0.5; z-index: 1;
         }
-        /* Capa 2: Pinos */
         .bg-trees {
             background-image: radial-gradient(circle at 50% 100%, #1e3c2f 10%, transparent 12%),
                               radial-gradient(circle at 50% 100%, #162b22 10%, transparent 12%);
@@ -34,7 +42,7 @@
             z-index: 2; opacity: 0.8;
         }
 
-        /* --- EFECTOS VISUALES --- */
+        /* --- EFECTOS --- */
         .speed-lines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 18;
             background: transparent; opacity: 0; transition: opacity 0.5s;
@@ -46,7 +54,6 @@
         }
         @keyframes scrollLines { from { background-position: 0 0; } to { background-position: 0 120px; } }
         
-        /* MODO FIESTA */
         @keyframes disco {
             0% { background-color: rgba(255, 0, 0, 0.2); } 25% { background-color: rgba(0, 255, 0, 0.2); }
             50% { background-color: rgba(0, 0, 255, 0.2); } 75% { background-color: rgba(255, 255, 0, 0.2); }
@@ -58,7 +65,6 @@
         }
         .party-overlay.active { display: block; animation: disco 0.5s infinite; }
 
-        /* MODO SLOW MOTION */
         .slowmo-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 16;
             pointer-events: none; background: rgba(52, 152, 219, 0.2);
@@ -66,14 +72,13 @@
         }
         .slowmo-overlay.active { opacity: 1; }
 
-        /* Nieve */
         .snowflake {
             position: absolute; top: -10px; background: white; border-radius: 50%; opacity: 0.8;
             animation: fall linear infinite; pointer-events: none; z-index: 15;
         }
         @keyframes fall { to { transform: translateY(105vh); } }
 
-        /* Elementos Juego */
+        /* JUEGO */
         .road-line { position: absolute; width: 10px; height: 70px; background-color: rgba(255,255,255,0.7); left: 50%; transform: translateX(-50%); border-radius: 4px; z-index: 3; }
         
         #header { position: absolute; top: 0; width: 100%; height: 75px; background: rgba(255, 255, 255, 0.95); z-index: 25; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #2980b9; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
@@ -107,7 +112,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
 
-        /* UI */
         .points-float {
             position: absolute; font-weight: 900; font-size: 28px; z-index: 30; 
             text-shadow: 0 2px 5px rgba(0,0,0,0.9); animation: floatUp 0.8s forwards;
@@ -140,7 +144,6 @@
         .char-option.santa-mode { border-color: #e74c3c; }
         .char-option.santa-mode.selected { box-shadow: 0 0 25px #e74c3c; }
 
-        /* TARJETA FINAL */
         .christmas-card {
             animation: popIn 0.8s ease; background: #fff; color: #333;
             width: 100%; max-width: 350px; border-radius: 15px; padding: 25px 20px;
@@ -150,7 +153,6 @@
         .card-score { font-size: 45px; font-weight: 900; color: #2c3e50; margin: 0; }
         .card-label { font-size: 12px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* BOCADILLO DE FRASE GRACIOSA */
         .quote-bubble {
             background: #fdf2e9; border: 2px solid #f39c12; border-radius: 10px;
             padding: 10px; margin: 15px 0; position: relative;
@@ -181,6 +183,9 @@
 <body>
 
     <div id="game-container">
+        <!-- BOTÓN MÚSICA -->
+        <button id="music-btn" onclick="toggleMusic()">🎵 Música: OFF</button>
+
         <!-- CAPAS PARALLAX -->
         <div class="parallax-layer bg-mountains" id="bg-mountains"></div>
         <div class="parallax-layer bg-trees" id="bg-trees"></div>
@@ -209,7 +214,6 @@
             <p style="color:#bbb; font-size: 13px;">Elige a tu conductor:</p>
             
             <div class="char-grid">
-                <!-- Fila 1 -->
                 <div class="char-option" onclick="selectChar('pablo', this)">
                     <img src="Pablo.png" onerror="this.src='https://ui-avatars.com/api/?name=Pablo&background=random&color=fff'">
                 </div>
@@ -219,11 +223,9 @@
                 <div class="char-option" onclick="selectChar('carmen', this)">
                     <img src="Carmen.png" onerror="this.src='https://ui-avatars.com/api/?name=Carmen&background=random&color=fff'">
                 </div>
-                <!-- Fila 2 -->
                 <div class="char-option" onclick="selectChar('rebeca', this)">
                     <img src="Rebeca.png" onerror="this.src='https://ui-avatars.com/api/?name=Rebeca&background=random&color=fff'">
                 </div>
-                <!-- SANTA (Default) -->
                 <div class="char-option santa-mode selected" onclick="selectChar('santa', this)">
                     <span class="char-emoji">🎅</span>
                 </div>
@@ -242,7 +244,7 @@
                 🎁 Regalo (+5) | 🛡️ Logo (Invencible) | ❄️ Copo (Slow Motion)
             </p>
 
-            <button class="btn-play" onclick="startGame()">▶ JUGAR AHORA 🔊</button>
+            <button class="btn-play" onclick="startGame()">▶ JUGAR AHORA</button>
         </div>
 
         <!-- PANTALLA RESULTADO -->
@@ -252,9 +254,8 @@
                 <div class="card-score" id="final-score">0</div>
                 <div id="new-record-msg" style="color: #f1c40f; font-weight: bold; font-size: 14px; display:none;">✨ ¡NUEVO RÉCORD! ✨</div>
                 
-                <!-- FRASES GRACIOSAS AQUÍ -->
                 <div class="quote-bubble">
-                    <p id="fun-quote">"Ups, eso ha dolido..."</p>
+                    <p id="fun-quote">"Ups..."</p>
                     <span id="quote-author">- CONDUCTOR</span>
                 </div>
 
@@ -262,6 +263,10 @@
                 
                 <div class="card-message">
                     El equipo de <span class="company-highlight">CV TOOLS</span> te desea unas fiestas llenas de alegría y un 2026 lleno de éxitos.
+                </div>
+
+                <div style="font-size: 13px; color: #999; margin-bottom: 15px; font-style: italic;">
+                    "Gracias por contar con nosotros"
                 </div>
 
                 <button class="btn-whatsapp" onclick="shareWhatsapp()">
@@ -275,77 +280,84 @@
     </div>
 
     <script>
-        /* --- DICCIONARIO DE FRASES DIVERTIDAS --- */
-        const characterQuotes = {
-            'SANTA': [
-                "¡Jo Jo Nooo! Se me han caído los regalos...",
-                "Esto con los renos no pasaba.",
-                "¡La leche! ¡Qué golpe!",
-                "Necesito el taller de reparaciones del Polo Norte."
-            ],
-            'PABLO': [
-                "La próxima vez que nos veamos analizamos este choque.",
-                "Ese cono no estaba en el presupuesto.",
-                "Cuando me coma el bocadillo de almorzar lo esquivo fijo.",
-                "Esa valla no estaba en el presupuesto"
-            ],
-            'OLGA': [
-                "Ese cono no estaba en el presupuesto.",
-                "Mañana a primera hora gestiono este incidente.",
-                "¡Ay! Mi T-Roc nuevo...",
-                "Esto no cumple la normativa ISO de conducción."
-            ],
-            'CARMEN': [
-                "¡Ups! Me ha pillado en Mercurio retrógrado.",
-                "Redirigiendo ruta... Menuda leche!",
-                "¿Alguien tiene el número de la grúa? Madre de Dios",
-                "¿Eso era una señal MOPU o económica?"
-            ],
-            'REBECA': [
-                "Esto lo arreglo yo en un momento.",
-                "¡Ups! Me ha pillado en Mercurio retrógrado.",
-                "¿Eso era una señal MOPU o económica?",
-                "Menos mal que tenemos seguro a todo riesgo."
-            ],
-            'SAYO': [
-                "Uff.. que golpe...Llama al comercial de la zona",
-                "La agencia ha tenido la culpa. Lo sabemos todos",
-                "La seguridad vial es lo primero (menos hoy).",
-                "¡Crash! Sistema reiniciando..."
-            ]
-        };
-
         /* --- MOTOR DE AUDIO (SYNTHESIS) --- */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
+        let musicInterval;
+        let isMusicOn = false;
+
+        const JingleBells = [
+            {f:659,d:0.2}, {f:0,d:0.05}, {f:659,d:0.2}, {f:0,d:0.05}, {f:659,d:0.4}, {f:0,d:0.2},
+            {f:659,d:0.2}, {f:0,d:0.05}, {f:659,d:0.2}, {f:0,d:0.05}, {f:659,d:0.4}, {f:0,d:0.2},
+            {f:659,d:0.2}, {f:783,d:0.2}, {f:523,d:0.3}, {f:587,d:0.1}, {f:659,d:0.8}, {f:0,d:0.2},
+            {f:698,d:0.2}, {f:698,d:0.2}, {f:698,d:0.3}, {f:698,d:0.1}, {f:698,d:0.2}, {f:659,d:0.2}, {f:659,d:0.2},
+            {f:659,d:0.2}, {f:587,d:0.2}, {f:587,d:0.2}, {f:659,d:0.2}, {f:587,d:0.4}, {f:783,d:0.4}
+        ];
+
         const SoundFX = {
-            playTone: (freq, type, duration) => {
+            playTone: (freq, type, duration, vol=0.1) => {
                 if(audioCtx.state === 'suspended') audioCtx.resume();
+                if(freq <= 0) return;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = type;
                 osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
                 osc.stop(audioCtx.currentTime + duration);
             },
-            gift: () => {
-                SoundFX.playTone(880, 'sine', 0.1);
-                setTimeout(() => SoundFX.playTone(1760, 'sine', 0.2), 100);
-            },
-            powerup: () => {
-                SoundFX.playTone(400, 'square', 0.1);
-                setTimeout(() => SoundFX.playTone(600, 'square', 0.1), 100);
-                setTimeout(() => SoundFX.playTone(1000, 'square', 0.3), 200);
-            },
+            gift: () => { SoundFX.playTone(880, 'sine', 0.1); setTimeout(()=>SoundFX.playTone(1760,'sine',0.2),100); },
+            powerup: () => { SoundFX.playTone(400, 'square', 0.1); setTimeout(()=>SoundFX.playTone(600,'square',0.1),100); setTimeout(()=>SoundFX.playTone(1000,'square',0.3),200); },
             slowmo: () => { SoundFX.playTone(1200, 'sine', 0.5); },
-            crash: () => {
-                SoundFX.playTone(100, 'sawtooth', 0.5);
-                SoundFX.playTone(50, 'square', 0.5);
+            crash: () => { SoundFX.playTone(100, 'sawtooth', 0.5); SoundFX.playTone(50, 'square', 0.5); }
+        };
+
+        function toggleMusic() {
+            const btn = document.getElementById('music-btn');
+            isMusicOn = !isMusicOn;
+            if(isMusicOn) {
+                btn.innerText = "🎵 Música: ON";
+                btn.classList.add('active');
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                playMusicLoop();
+            } else {
+                btn.innerText = "🎵 Música: OFF";
+                btn.classList.remove('active');
+                stopMusicLoop();
             }
+        }
+
+        let noteIndex = 0;
+        function playMusicLoop() {
+            if(musicInterval) clearInterval(musicInterval);
+            noteIndex = 0;
+            const playNext = () => {
+                if(!isMusicOn || !gameRunning) return;
+                const note = JingleBells[noteIndex % JingleBells.length];
+                SoundFX.playTone(note.f, 'triangle', note.d, 0.05);
+                noteIndex++;
+                // Velocidad música depende de si hay slowmo
+                const tempo = isSlowMo ? 1.5 : 1.0; 
+                musicInterval = setTimeout(playNext, (note.d * 1000) * tempo);
+            }
+            playNext();
+        }
+
+        function stopMusicLoop() {
+            if(musicInterval) clearTimeout(musicInterval);
+        }
+
+        /* --- FRASES --- */
+        const characterQuotes = {
+            'SANTA': ["¡Jo Jo Nooo! Mis regalos...", "Esto con los renos no pasaba.", "¡Por las barbas de Merlín!", "Necesito el taller del Polo Norte."],
+            'PABLO': ["Cuando termine de almorzar estaré más fuerte", "Esa valla no estaba en el presupuesto", "Ese cono no estaba en el presupuesto", "Estaba llamando a la agencia... un despiste"],
+            'OLGA': ["Ese cono no estaba en el presupuesto.", "Estoy en Mercurio retrógrado. Pasas que cosan ", "Ese cono no estaba en el presupuesto", "Estaba llamando a la agencia... un despiste"],
+            'CARMEN': ["Cuando termine de almorzar estaré más fuerte", "Esa valla no estaba en el presupuesto", "Ese cono no estaba en el presupuesto", "Estaba llamando a la agencia... un despiste"],
+            'REBECA': ["Esto lo arreglo yo en un momento.", "¡Vaya! Se me ha cruzado un cono.", "Estoy en Mercurio retrógrado. Pasas que cosan", "Estaba llamando a la agencia... un despiste"],
+            'SAYO': ["Uff... ahora te llamo", "Necesito llamar a la agencia. El bulto me ha dado en a mí", "La seguridad vial es lo primero (menos hoy).", "¡Crash! Sistema reiniciando..."]
         };
 
         /* --- CONFIGURACIÓN --- */
@@ -362,7 +374,6 @@
         const highScoreDisplay = document.getElementById('high-score-display');
         const shieldBar = document.getElementById('shield-bar');
         
-        // Efectos
         const speedLines = document.getElementById('speed-lines');
         const partyOverlay = document.getElementById('party-overlay');
         const slowmoOverlay = document.getElementById('slowmo-overlay');
@@ -391,7 +402,6 @@
 
         highScoreDisplay.innerText = `🏆 TU RÉCORD: ${highScore}`;
 
-        /* NIEVE */
         function createSnow() {
             setInterval(() => {
                 const flake = document.createElement('div');
@@ -405,7 +415,6 @@
         }
         createSnow();
 
-        /* SELECCIÓN DE PERSONAJE */
         function selectChar(charType, element) {
             document.querySelectorAll('.char-option').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
@@ -442,7 +451,6 @@
             }
         }
 
-        /* MOVIMIENTO */
         function moveLeft() { if(playerPos > 15) playerPos -= 20; updatePlayerPos(); }
         function moveRight() { if(playerPos < 85) playerPos += 20; updatePlayerPos(); }
         
@@ -463,13 +471,13 @@
 
         function updatePlayerPos() { playerEl.style.left = playerPos + '%'; }
 
-        /* JUEGO */
         function startGame() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             renderPlayer();
             startScreen.classList.add('hidden');
             resetVariables();
             gameRunning = true;
+            if(isMusicOn) playMusicLoop();
             gameLoop();
         }
 
@@ -493,9 +501,9 @@
             speedLines.classList.remove('active');
             
             if(animId) cancelAnimationFrame(animId);
+            stopMusicLoop();
         }
 
-        /* SPAWNERS */
         function createItem(type) {
             const lanes = [10, 30, 50, 70, 90];
             const lane = lanes[Math.floor(Math.random() * lanes.length)];
@@ -525,12 +533,11 @@
             items.push(itemObj);
         }
 
-        /* PODERES */
         function activateInvincibility() {
             SoundFX.powerup();
             isInvincible = true;
             playerEl.classList.add('invincible');
-            partyOverlay.classList.add('active'); // MODO FIESTA
+            partyOverlay.classList.add('active'); 
             shieldBar.style.width = '80px';
             showFloatText('¡ESCUDO CV TOOLS!', '#3498db');
             if(invincibleTimer) clearTimeout(invincibleTimer);
@@ -574,7 +581,6 @@
             setTimeout(() => floatText.remove(), 800);
         }
 
-        /* LOOP PRINCIPAL */
         function gameLoop() {
             if (!gameRunning) return;
             frameCount++;
@@ -655,23 +661,19 @@
             if (gameRunning) animId = requestAnimationFrame(gameLoop);
         }
 
-        /* FIN */
         function finishGame() {
             gameRunning = false;
+            stopMusicLoop();
             finalScoreEl.innerText = score;
             
-            // FRASES GRACIOSAS
             const driverName = currentDriver.name;
             const quoteEl = document.getElementById('fun-quote');
             const authorEl = document.getElementById('quote-author');
-            
             const quotes = characterQuotes[driverName] || characterQuotes['SANTA'];
             const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-            
             quoteEl.innerText = `"${randomQuote}"`;
             authorEl.innerText = `- ${driverName}`;
 
-            // Récord
             let isNewRecord = false;
             if (score > highScore) {
                 highScore = score;
@@ -683,7 +685,6 @@
             resultScreen.classList.remove('hidden');
         }
 
-        /* COMPARTIR */
         function shareWhatsapp() {
             const driverName = currentDriver.name;
             const text = `🎅 Reto Navidad CV TOOLS 🎅\n\n¡He logrado ${score} puntos con ${driverName}!\n\n¿Puedes superar mi récord?\n\nJuega aquí:`;
